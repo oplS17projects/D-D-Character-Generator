@@ -1,0 +1,19 @@
+1st-lvl-hp, 12, cons-mod
+set-hit-dice, 1, 12 ; 1d12
+add-profiencies, "light-armor"
+add-profiencies, "medium armor"
+add-profiencies, "shields"
+add-profiencies, "simple-weapons"
+add-profiencies, "maritial weapons"
+Set-saving-throw, strength
+Set-saving-throw, constitution
+add-skill-choice, "Animal Handling"
+add-skill-choice, "Athletics"
+add-skill-choice, "Intimidation"
+add-skill-choice, "Nature"
+add-skill-choice, "Perception"
+add-skill-choice, "Survival"
+inc-skill-choice, 2
+add-ability, "Rage", 2
+set-ac, 10, dex-mod, cons-mod
+roll-gold, 2d4, 10
