@@ -1,20 +1,28 @@
-# Project Title Goes Here (10 words maximum)
+# D&D Character Creator
 
 ### Statement
 Describe your project. Why is it interesting? Why is it interesting to you personally? What do you hope to learn? 
+* File Based D&D Character Creator
 
 ### Analysis
+Using files to generate a random character
+Files will be csv files that'll be parsed with an evaluator
+
 Explain what approaches from class you will bring to bear on the project.
 
 Be explicit about the techiques from the class that you will use. For example:
 
 - Will you use data abstraction? How?
 - Will you use recursion? How?
+  - Yes Iterating through CSV files
 - Will you use map/filter/reduce? How? 
+  - Yes, same as above, using functions like build-list and csv->map
 - Will you use object-orientation? How?
 - Will you use functional approaches to processing your data? How?
 - Will you use state-modification approaches? How? (If so, this should be encapsulated within objects. `set!` pretty much should only exist inside an object.)
+  - Yes, need to store the variables, either with global variables or some sort of environment
 - Will you build an expression evaluator, like we did in the symbolic differentatior and the metacircular evaluator?
+  - Yes to evaluate everything
 - Will you use lazy evaluation approaches?
 
 The idea here is to identify what ideas from the class you will use in carrying out your project. 
