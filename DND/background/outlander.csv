@@ -1,7 +1,7 @@
 add-skill, athletics
 add-skill, survival
-add-language-choice, any
-add-language-count, 1
+add-language-choice, any*
+inc-language-count, 1
 add-note, Proficient With One Type of Musical Instrument
 add-item, Staff, 1
 add-item, Hunting Trap, 1

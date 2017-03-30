@@ -4,7 +4,6 @@ inc-stat, constitution, 1
 inc-stat, intelligence, 1
 inc-stat, wisdom, 1
 inc-stat, charisma, 1
-add-alignment-choice, any !#
 add-language, common
 add-language-choice, any
 add-language-count, 1

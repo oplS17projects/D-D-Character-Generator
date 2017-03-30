@@ -1,65 +1,95 @@
 # D&D Character Creator
 
 ### Statement
-Describe your project. Why is it interesting? Why is it interesting to you personally? What do you hope to learn? 
-* File Based D&D Character Creator
+The idea of this project is to be able to generate a random Dungeon and Dragons 5th edition character. We're doing this with various csv files that are parsed through an evaluator to generate the character.
 
 ### Analysis
-Using files to generate a random character
-Files will be csv files that'll be parsed with an evaluator
+Map will be used extensively throughout this project to iterate through csv files (csv->map) and to iterate through lists.
 
-Explain what approaches from class you will bring to bear on the project.
+Recursion is used in the roll function.
+The roll "2d6" means rolling 2 6 sided dice. We also used a regex to parse a string like "2d6" to pass it to the roll function. Example (diceroll "2d6") evaluates to (roll 2 6). The following is the code for the function.
+~~~
+(define (diceroll? dr)
+  (if (string? dr)
+      (regexp-match? #px"[0-9]+d[0-9]+" dr)
+      #f))
 
-Be explicit about the techiques from the class that you will use. For example:
+(define (diceroll roll-string)
+  (define numdice (car (regexp-match #px"[0-9]+" roll-string)))
+  (define dicesize (car (regexp-match #px"[0-9]+" (car (regexp-match #px"d[0-9]+" roll-string)))))
+  (roll (string->number numdice) (string->number dicesize))
+  )
 
-- Will you use data abstraction? How?
-- Will you use recursion? How?
-  - Yes Iterating through CSV files
-- Will you use map/filter/reduce? How? 
-  - Yes, same as above, using functions like build-list and csv->map
-- Will you use object-orientation? How?
-- Will you use functional approaches to processing your data? How?
-- Will you use state-modification approaches? How? (If so, this should be encapsulated within objects. `set!` pretty much should only exist inside an object.)
-  - Yes, need to store the variables, either with global variables or some sort of environment
-- Will you build an expression evaluator, like we did in the symbolic differentatior and the metacircular evaluator?
-  - Yes to evaluate everything
-- Will you use lazy evaluation approaches?
+(define (roll numdice dicesize)
+  (if (eq? numdice 0)
+      0
+      (+ (+ 1 (random  dicesize)) (roll (- numdice 1) dicesize))))
+~~~
 
-The idea here is to identify what ideas from the class you will use in carrying out your project. 
-
-**Your project will be graded, in part, by the extent to which you adopt approaches from the course into your implementation, _and_ your discussion about this.**
-
-### External Technologies
-You are encouraged to develop a project that connects to external systems. For example, this includes systems that:
-
-- retrieve information or publish data to the web
-- generate or process sound
-- control robots or other physical systems
-- interact with databases
-
-If your project will do anything in this category (not only the things listed above!), include this section and discuss.
+Each expression will be evaluated through a metacircular evaluator similiar to what we did in class.
+The following functions need to be checked and implimented:
+~~~
+add:+                        ; Standard add the list
+mul:*                        ; Multiply the list
+1st-lvl-hp                   ; Set the hp at first level
+set-hit-dice                 ; Sets the hit dice used for level up, ex: 1d8
+level-up                     ; Applies level up stuff
+inc-health                   ; Increase health
+roll                         ; Dice roll, already done, see above
+add-profiencies              ; Proficiency list notes?
+set-saving-throw             ; Stat should have a is-saving-throw element, set to true
+add-skill                    ; Sets skill to proficient
+add-skill-choice             ; (?) Save choices in list for future use?
+inc-skill-choices            ; Var starts at 0, increases by number
+choose-choices               ; Eval choices or print out choices?
+add-ability                  ; Set note of what the skill is and total uses
+set-ac                       ; Store the string to eval armor class
+roll-gold                    ; Evaluate the string and store the gold in inventory
+choose                       ; Given a list of options, choose a random one
+add-item                     ; Add item and quantity to inventory
+add-language-choice          ; See add-skill-choice
+inc-language-count           ; See inc-skill-choices
+add-note                     ; Adds generic note to character
+inc-stat                     ; Increases given stat by number, example (inc-stat "strength" 1)
+set-speed                    ; Sets walking speed
+~~~
 
 ### Data Sets or other Source Materials
-If you will be working with existing data, where will you get those data from? (Dowload from a website? Access in a database? Create in a simulation you will build? ...)
-
-How will you convert your data into a form usable for your project?  
-
-If you are pulling data from somewhere, actually go download it and look at it before writing the proposal. Explain in some detail what your plan is for accomplishing the necessary processing.
-
-If you are using some other starting materials, explain what they are. Basically: anything you plan to use that isn't code.
+Any and all csv files will be written by us from either the [Dungeon and Dragon's 5e Player's Handbook](http://a.co/hDUb8oH) or other homebrew material.
+--Note someone scanned the book online [here][online-pdf]
+[online-pdf]: https://dnd.rem.uz/5e%20D%26D%20Books/D%26D%205e%20-%20Players%20Handbook%20(Small).pdf
+An example of a Barbarian class would be something like the following, commented after with ; is an explication
+~~~
+1st-lvl-hp, "add:+, 12, cons-mod"          ; Evaluate the following at level 1
+set-hit-dice, 1d12                         ; Setting the hit dice character variable
+add-profiencies, "light-armor"             ; Barbarians are proficient in light armor, make a note
+add-profiencies, "medium armor"            ; Barbarians are proficient in medium armor, make a note
+add-profiencies, "shields"                 ; Barbarians are proficient in shields, make a note
+add-profiencies, "simple-weapons"          ; Barbarians are proficient in simplec weapons, make a note
+add-profiencies, "maritial weapons"        ; Barbarians are proficient in maritial wepaons, make a note
+set-saving-throw, strength                 ; Strength should have a is-saving-throw element, set to true
+set-saving-throw, constitution             ; Constitution should have a is-saving-throw element, set to true
+add-skill-choice, "Animal Handling"        ; Player is given a choice of skills they could be proficient in
+add-skill-choice, "Athletics"              ; For now, note the list and print it out later, if we have time
+add-skill-choice, "Intimidation"           ;	implement a skill chooser.
+add-skill-choice, "Nature"
+add-skill-choice, "Perception"
+add-skill-choice, "Survival"
+inc-skill-choice, 2                        ; Out of those, choose 2
+add-ability, Rage, 2                       ; Note the ability Rage, at level 1 you have 2 uses
+set-ac, "add:+, 10, dex-mod, cons-mod"     ; Armor class is usually defined by armor, Barbarian defines it otherwise
+roll-gold, "mul:*, 2d4, 10"                ; Each class has its own amount of gold the player starts with
+choose, "add-item, greataxe, 1", "add-item, any-martial-weapon, 1"    ; Need to choose one or the other, random selection
+choose, "add-item, handaxe, 2", "add-item, any-simple-weapon, 1"
+add-item, explorer's pack, 1               ; Add the following items with coresponding quantity
+add-item, javelin, 4
+~~~
 
 ### Deliverable and Demonstration
-Explain exactly what you'll have at the end. What will it be able to do at the live demo?
-
-What exactly will you produce at the end of the project? A piece of software, yes, but what will it do? Here are some questions to think about (and answer depending on your application).
-
-Will it run on some data, like batch mode? Will you present some analytical results of the processing? How can it be re-run on different source data?
-
-Will it be interactive? Can you show it working? This project involves a live demo, so interactivity is good.
+TBD
 
 ### Evaluation of Results
-How will you know if you are successful? 
-If you include some kind of _quantitative analysis,_ that would be good.
+If at the end we have a random character outputted, however we decide to do it.
 
 ## Architecture Diagram
 Upload the architecture diagram you made for your slide presentation to your repository, and include it in-line here.
@@ -91,19 +121,9 @@ Here each group member gets a section where they, as an individual, detail what 
 
 Please use Github properly: each individual must make the edits to this file representing their own section of work.
 
-**Additional instructions for teams of three:** 
-* Remember that you must have prior written permission to work in groups of three (specifically, an approved `FP3` team declaration submission).
-* The team must nominate a lead. This person is primarily responsible for code integration. This work may be shared, but the team lead has default responsibility.
-* The team lead has full partner implementation responsibilities also.
-* Identify who is team lead.
 
-In the headings below, replace the silly names and GitHub handles with your actual ones.
-
-### Susan Scheme @susanscheme
+### Van Ha @VanHaUML
 will write the....
 
-### Leonard Lambda @lennylambda
+### Jonathan Murphy @MurphyWants
 will work on...
-
-### Frank Funktions @frankiefunk 
-Frank is team lead. Additionally, Frank will work on...   

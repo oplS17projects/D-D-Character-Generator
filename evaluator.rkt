@@ -75,3 +75,6 @@
   (if (eq? numdice 0)
       0
       (+ (+ 1 (random  dicesize)) (roll (- numdice 1) dicesize))))
+
+; File Functions
+; Get List of Files
