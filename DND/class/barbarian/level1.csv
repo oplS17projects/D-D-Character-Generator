@@ -17,7 +17,7 @@ inc-skill-choice, 2
 add-ability, Rage, 2
 set-ac, "add:+ 10 dex-mod cons-mod"
 roll-gold, 2d4, 10
-choose, "add-item, greataxe, 1", "add-item, any-martial-weapon, 1"
-choose, "add-item, handaxe, 2", "add-item, any-simple-weapon, 1"
+choose, "add-item greataxe 1", "add-item any-martial-weapon 1"
+choose, "add-item handaxe 2", "add-item any-simple-weapon 1"
 add-item, explorer's pack, 1
 add-item, javelin, 4

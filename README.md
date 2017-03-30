@@ -52,6 +52,8 @@ inc-language-count           ; See inc-skill-choices
 add-note                     ; Adds generic note to character
 inc-stat                     ; Increases given stat by number, example (inc-stat "strength" 1)
 set-speed                    ; Sets walking speed
+set-sc                       ; Set subclass
+if-sc                        ; If character has subclass, do something
 ~~~
 
 ### Data Sets or other Source Materials
@@ -97,18 +99,18 @@ Upload the architecture diagram you made for your slide presentation to your rep
 Create several paragraphs of narrative to explain the pieces and how they interoperate.
 
 ## Schedule
-Explain how you will go from proposal to finished product. 
+Explain how you will go from proposal to finished product.
 
 There are three deliverable milestones to explicitly define, below.
 
-The nature of deliverables depend on your project, but may include things like processed data ready for import, core algorithms implemented, interface design prototyped, etc. 
+The nature of deliverables depend on your project, but may include things like processed data ready for import, core algorithms implemented, interface design prototyped, etc.
 
 You will be expected to turn in code, documentation, and data (as appropriate) at each of these stages.
 
-Write concrete steps for your schedule to move from concept to working system. 
+Write concrete steps for your schedule to move from concept to working system.
 
 ### First Milestone (Sun Apr 9)
-Which portion of the work will be completed (and committed to Github) by this day? 
+Which portion of the work will be completed (and committed to Github) by this day?
 
 ### Second Milestone (Sun Apr 16)
 Which portion of the work will be completed (and committed to Github) by this day?  

@@ -78,36 +78,3 @@
 
 ; File Functions
 ; Get List of Files
-
-; Get list of backgrounds in format cons("Name", file)
-(define (get-background-list)
-  (define location (string-append folder-base "/background"))
-  (map (lambda (f) (cons (remove-csv (path-name-to-file-name (path->string f))) f)) (directory-list location #:build? #t))
-  )
-
-; Get list of classes
-(define (get-class-list)
-  (define location (string-append folder-base "/class"))
-  (map (lambda (f) (cons (string-titlecase (path-name-to-file-name (path->string f))) f)) (directory-list location #:build? #t))
-  )
-
-; Get list of races
-
-(define (get-race-list)
-  (define location (string-append folder-base "/race"))
-  (map (lambda (f) (cons (remove-csv (path-name-to-file-name (path->string f))) f)) (directory-list location #:build? #t))
-  )
-
-; Random Helper Functions
-; Remove Csv, given filename, return Name without csv
-;            Ex: "Outlander.csv" -> "Outlander"
-(define (remove-csv filenamecsv)
-  (string-titlecase (car (string-split filenamecsv ".")))
-  )
-
-; Given pathname, get file name
-;            Ex: "DND/background/outlander.csv" -> "outlander.csv"
-(define (path-name-to-file-name filenamepath)
-  (define str (string-split filenamepath "/"))
-  (list-ref str (- (length str) 1))
-  )
