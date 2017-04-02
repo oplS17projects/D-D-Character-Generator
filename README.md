@@ -103,15 +103,6 @@ This list gets passed to the evaluator. Each race, class and background is chose
 Throughout the evaluation, all values are stored in a hash table. The data will be accessible through the Gui.
 
 ## Schedule
-Explain how you will go from proposal to finished product.
-
-There are three deliverable milestones to explicitly define, below.
-
-The nature of deliverables depend on your project, but may include things like processed data ready for import, core algorithms implemented, interface design prototyped, etc.
-
-You will be expected to turn in code, documentation, and data (as appropriate) at each of these stages.
-
-Write concrete steps for your schedule to move from concept to working system.
 
 ### First Milestone (Sun Apr 9)
 We will have some functions of the evaluator working, be able to read from the necessary files and some basic functions of a GUI.
