@@ -94,9 +94,13 @@ The end product will be some sort of GUI to display the generated character.
 We'll know it works if a complete character is shown.
 
 ## Architecture Diagram
-Upload the architecture diagram you made for your slide presentation to your repository, and include it in-line here.
+![Diagram image](diagram.png?raw=true "Architecture Diagram")
 
-Create several paragraphs of narrative to explain the pieces and how they interoperate.
+The project starts with a variety of csv files. This files are a list of races, classes and backgrounds. Each of these has a function (get-background-list, get-class-list, get-race-list) that returns a list of cons, where the first argument is a readable name and the second element is a path to the correct file or folder.
+
+This list gets passed to the evaluator. Each race, class and background is chosen or chosen randomly. After choosing one of each, each race csv file gets evaluated through the evaluator. Then the class correct level#.csv file gets evaluated. Then the background.csv file gets evaluated.
+
+Throughout the evaluation, all values are stored in a hash table. The data will be accessible through the Gui.
 
 ## Schedule
 Explain how you will go from proposal to finished product.
