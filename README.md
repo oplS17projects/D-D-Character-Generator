@@ -59,7 +59,7 @@ if-sc                        ; If character has subclass, do something
 ### Data Sets or other Source Materials
 Any and all csv files will be written by us from either the [Dungeon and Dragon's 5e Player's Handbook](http://a.co/hDUb8oH) or other homebrew material.
 --Note someone scanned the book online [here][online-pdf]
-[online-pdf]: https://dnd.rem.uz/5e%20D%26D%20Books/D%26D%205e%20-%20Players%20Handbook%20(Small).pdf
+
 An example of a Barbarian class would be something like the following, commented after with ; is an explication
 ~~~
 1st-lvl-hp, "add:+, 12, cons-mod"          ; Evaluate the following at level 1
@@ -88,10 +88,10 @@ add-item, javelin, 4
 ~~~
 
 ### Deliverable and Demonstration
-TBD
+The end product will be some sort of GUI to display the generated character.
 
 ### Evaluation of Results
-If at the end we have a random character outputted, however we decide to do it.
+We'll know it works if a complete character is shown.
 
 ## Architecture Diagram
 Upload the architecture diagram you made for your slide presentation to your repository, and include it in-line here.
@@ -110,22 +110,21 @@ You will be expected to turn in code, documentation, and data (as appropriate) a
 Write concrete steps for your schedule to move from concept to working system.
 
 ### First Milestone (Sun Apr 9)
-Reading data from file and basic GUI
+We will have some functions of the evaluator working, be able to read from the necessary files and some basic functions of a GUI.
 
 ### Second Milestone (Sun Apr 16)
-Functions working and functional GUI   
+We'll have the evaluator working and a fully functional GUI.
 
 ### Public Presentation (Mon Apr 24, Wed Apr 26, or Fri Apr 28 [your date to be determined later])
-Multiple classes
+We'll have multiple races, background and classes.
 
 ## Group Responsibilities
-Here each group member gets a section where they, as an individual, detail what they are responsible for in this project. Each group member writes their own Responsibility section. Include the milestones and final deliverable.
-
-Please use Github properly: each individual must make the edits to this file representing their own section of work.
-
 
 ### Van Ha @VanHaUML
 I will be working on the GUI and the functions to extract information from the hash table that stores the data and display them in the GUI.
 
 ### Jonathan Murphy @MurphyWants
-will work on...
+The evaluator, reading from files and storing data in the hash table.
+
+
+[online-pdf]: https://dnd.rem.uz/5e%20D%26D%20Books/D%26D%205e%20-%20Players%20Handbook%20(Small).pdf
