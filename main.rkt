@@ -1,5 +1,6 @@
 #lang racket
 (require racket/gui)
+(require rsound)
 (include "charsheet.rkt")
 
 (define logo (read-bitmap "./DND/ddlogo.png"))
@@ -26,6 +27,7 @@
   (cond ((eqv? x 0) (setStat "Class" "Barbarian"))
         ((eqv? x 1) (setStat "Class" "Cleric"))
         ((eqv? x 2) (setStat "Class" "Mage"))))
+
 
 ; main window
 (define main (new frame% [label "D & D Character Generator"]
@@ -86,8 +88,10 @@
                       [parent genPanel]
                       [callback (λ  (b e)
                                   (genCS #t))]))
-
-
-
-
 (send main show #t)
+
+; Johnny Douglas' Dungeons & Dragons cartoon theme
+; converted from youtube video
+; https://www.youtube.com/watch?v=v2u7-M7Ouok&t=37s
+(define theme (rs-read "./DND/DDTheme.wav"))
+(play theme)
