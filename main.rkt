@@ -1,0 +1,93 @@
+#lang racket
+(require racket/gui)
+(include "charsheet.rkt")
+
+(define logo (read-bitmap "./DND/ddlogo.png"))
+
+; hash table to contain stats
+(define stats (make-hash))
+
+; gets value in hash table by 
+(define (getStatVal statKey)
+  (hash-ref stats statKey))
+
+; sets key/value pair in hash table
+(define (setStat key val)
+  (hash-set! stats key val))
+
+; sets race in stats hash table based on radiobox choice
+(define (setRace x)
+  (cond ((eqv? x 0) (setStat "Race" "Human"))
+        ((eqv? x 1) (setStat "Race" "Elf"))
+        ((eqv? x 2) (setStat "Race" "Dwarf"))))
+
+; sets class
+(define (setClass x)
+  (cond ((eqv? x 0) (setStat "Class" "Barbarian"))
+        ((eqv? x 1) (setStat "Class" "Cleric"))
+        ((eqv? x 2) (setStat "Class" "Mage"))))
+
+; main window
+(define main (new frame% [label "D & D Character Generator"]
+                  [width 560]
+                  [height 300]))
+
+(define logoPanel (new horizontal-panel% [parent main]
+                       [min-height 72]))
+(define choicePanel (new horizontal-panel% [parent main]
+                         [min-height 200]))
+(define genPanel (new horizontal-panel% [parent main]
+                      [alignment '(center center)]))
+
+(new canvas% [parent logoPanel]
+    [style '(control-border)]
+    [paint-callback
+     (λ (canvas dc)
+     (send dc draw-bitmap logo 0 0))])
+
+(define leftPanel (new vertical-panel% [parent choicePanel]))
+(define rightPanel (new vertical-panel% [parent choicePanel]))
+
+(define playerName (new text-field%
+                        [label "Player Name"]
+                        [parent leftPanel]
+                        [vert-margin 4]
+                        [callback (λ (b e)
+                                    (setStat "Player Name" (send playerName get-value)))]))
+
+(define raceBox (new radio-box%
+                     [label "Race"]
+                     [choices (list "Human" "Elf" "Dwarf")]
+                     [parent leftPanel]
+                     [vert-margin 10]
+                     [horiz-margin 5]
+                     [style (list 'vertical 'vertical-label)]
+                     [callback (λ (b e)
+                               (setRace (send raceBox get-selection)))]
+                     ))
+
+(define charName (new text-field%
+                        [label "Character Name"]
+                        [parent rightPanel]
+                        [vert-margin 4]
+                        [callback (λ (b e)
+                                  (setStat "Character Name" (send charName get-value)))]))
+(define classBox (new radio-box%
+                     [label "Class"]
+                     [choices (list "Barbarian" "Cleric" "Mage")]
+                     [parent rightPanel]
+                     [style (list 'vertical 'vertical-label)]
+                     [callback (λ (b e)
+                               (setClass (send classBox get-selection)))]
+                     ))
+
+(define genSheet (new button%
+                      [label "Generate Character Sheet"]
+                      [parent genPanel]
+                      [callback (λ  (b e)
+                                  (genCS #t))]))
+
+
+
+
+(send main show #t)
