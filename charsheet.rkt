@@ -1,5 +1,4 @@
-
-(include "evaluator.rkt")
+(require "evaluator.rkt")
 
 (define (genCS showsheet)
   (let ((sheetpicture (read-bitmap "./DND/ddcharsheet.png"))

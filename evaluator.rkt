@@ -188,3 +188,5 @@
   (if (string? str)
       (list->string (filter (lambda (c) (not (char-whitespace? c))) (string->list str)))
       str))
+
+(provide (all-defined-out))
