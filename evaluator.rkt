@@ -44,34 +44,94 @@
 
 ; Assumes exp is a list
 (define (evaluator exp)
-  (cond
-    [(diceroll? exp) (diceroll exp)]
-    [else exp]))
+  (begin
+    (display "Trying: ")
+    (display exp)
+    (display "\n")
+    (cond
+      [(number? exp) exp]
+      [(diceroll? exp) (diceroll exp)]
+      [(add:? exp) (add:+ exp)]
+      [(sub:? exp) (sub:- exp)]
+      [(choose? exp) (choose exp)]
+      [(add-item? exp) (add-item exp)]
+      [(roll-gold? exp) (roll-gold exp)]
+      ;[(string->number exp) (string->number exp)]
+      [(self-eval? exp) (self-eval exp)]
+      [else (display "Failed\n\n" )])))
 
 ; Returns true if exp1 is a list and matches exp2
 ; Taken from evaluator hw
 (define (if-exp-match? exp1 exp2)
   (if (list? exp1)
-      (eq? (car exp1) exp2)
+      (if (string? (car exp1))
+          (string=? (remove-white-space (car exp1)) exp2)
+          (string=? (remove-white-space (symbol->string (car exp1))) exp2))
       #f))
 
 ; Add functions
 (define (add:? exp)
-  (if-exp-match? exp))
+  (if-exp-match? exp "add:+"))
 
 (define (add:+ exp)
   (if (or (null? exp) (null? (cdr exp)))
       0
-      (+ (evaluator (cadr exp)) (add:+ (cddr exp)))))
+        (proclst (map (lambda (n) (evaluator n)) (cdr exp)) +)))
 
+(define (proclst lst proc)
+  (apply proc lst))
+
+; Sub functions
+(define (sub:? exp)
+  (if-exp-match? exp "sub:-"))
+
+(define (sub:- exp)
+(if (or (null? exp) (null? (cdr exp)))
+      0
+        (proclst (map (lambda (n) (evaluator n)) (cdr exp)) -)))
+
+; Choose function
+(define (choose? exp)
+  (if-exp-match? exp "choose"))
+
+(define (choose exp)
+  (evaluator (string->csvlist (car (shuffle (cdr exp))))))
+
+(define (string->csvlist str)
+  (string-split str " "))
+
+; Inventory functions, this is a mockup and not the final product!!!!
+;TODO
+
+(define (add-item? exp)
+  (if-exp-match? exp "add-item"))
+
+(define (add-item exp) ;Need to actually add item to inventory
+  (display (string-append "Adding item  " (cadr exp) ", of quantity " (caddr exp) ".\n")))
+
+(define (roll-gold? exp)
+  (if-exp-match? exp "roll-gold"))
+
+(define (roll-gold exp) ;Need to actually add gold to inventory
+  (proclst (map (lambda (n) (evaluator n)) (map (lambda (n) (remove-white-space n)) (cdr exp))) *))
+
+
+(define (self-eval? exp)
+  (not (list? exp)))
+
+(define (self-eval exp)
+  (cond
+    [(string->number exp) (string->number exp)]
+    [else exp]
+    ))
 
 ; Diceroll?
 (define (diceroll? dr)
   (begin
     (define dir 0)
     (if (list? dr)
-        (set! dir (car dr))
-        (set! dir dr))
+        (set! dir (remove-white-space (car dr)))
+        (set! dir (remove-white-space dr)))
     (if (string? dir )
         (regexp-match? #px"[0-9]+d[0-9]+"  dir)
         #f)))
@@ -122,3 +182,9 @@
   (define str (string-split filenamepath "/"))
   (list-ref str (- (length str) 1))
   )
+
+; Removes white space
+(define (remove-white-space str)
+  (if (string? str)
+      (list->string (filter (lambda (c) (not (char-whitespace? c))) (string->list str)))
+      str))
