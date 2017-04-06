@@ -45,9 +45,9 @@
 ; Assumes exp is a list
 (define (evaluator exp)
   (begin
-    (display "Trying: ")
-    (display exp)
-    (display "\n")
+;    (display "Trying: ")
+;    (display exp)
+;    (display "\n")
     (cond
       [(number? exp) exp]
       [(diceroll? exp) (diceroll exp)]
@@ -56,9 +56,14 @@
       [(choose? exp) (choose exp)]
       [(add-item? exp) (add-item exp)]
       [(roll-gold? exp) (roll-gold exp)]
+      [(isMod? exp) (string->mod exp)]
       ;[(string->number exp) (string->number exp)]
       [(self-eval? exp) (self-eval exp)]
-      [else (display "Failed\n\n" )])))
+      [else (begin
+              (display "Failed on: " )
+              (display exp)
+              (display "\n\n")
+              #f)])))
 
 ; Returns true if exp1 is a list and matches exp2
 ; Taken from evaluator hw
@@ -79,7 +84,9 @@
         (proclst (map (lambda (n) (evaluator n)) (cdr exp)) +)))
 
 (define (proclst lst proc)
-  (apply proc lst))
+  (if (null? lst)
+      0
+      (apply proc lst)))
 
 ; Sub functions
 (define (sub:? exp)
@@ -100,8 +107,9 @@
 (define (string->csvlist str)
   (string-split str " "))
 
+
+; Begin TODO
 ; Inventory functions, this is a mockup and not the final product!!!!
-;TODO
 
 (define (add-item? exp)
   (if-exp-match? exp "add-item"))
@@ -109,12 +117,53 @@
 (define (add-item exp) ;Need to actually add item to inventory
   (display (string-append "Adding item  " (cadr exp) ", of quantity " (caddr exp) ".\n")))
 
+
 (define (roll-gold? exp)
   (if-exp-match? exp "roll-gold"))
 
 (define (roll-gold exp) ;Need to actually add gold to inventory
   (proclst (map (lambda (n) (evaluator n)) (map (lambda (n) (remove-white-space n)) (cdr exp))) *))
 
+
+(define (1st-lvl-hp? exp)
+  (if-exp-match? exp "1st-lvl-hp"))
+
+(define (1st-lvl-hp exp) ; Set var hp to the actual hp
+  (define hp (evaluator (cdr exp)))
+  hp)
+
+(define (getstat str)
+  ; Would refrence hash to get relevant stat
+  ; Ie, (hash-get stat str)
+  ; for now, using str as a number to test
+  (if (number? str)
+      str
+      (cond
+        [(string=? str "strength") 20]
+        [(string=? str "dexterity") 16]
+        [(string=? str "constitution") 12]
+        [(string=? str "intelligence") 8]
+        [(string=? str "wisdom") 4]
+        [(string=? str "charisma") 10]
+        [else 36]))
+  )
+
+(define (getmod str)
+  (floor (/ (- (getstat str) 10) 2))
+  )
+
+; END TODO
+
+(define (isMod? exp)
+  (if (list? exp)
+      #f
+      (if (string? exp)
+          (regexp-match? #px"[a-z]+-mod"  exp)
+          (regexp-match? #px"[a-z]+-mod"  (symbol->string exp))
+          )))
+
+(define (string->mod exp)
+  (getmod (car (regexp-match #px"[a-z]+" exp))))
 
 (define (self-eval? exp)
   (not (list? exp)))

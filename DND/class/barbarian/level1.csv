@@ -1,4 +1,4 @@
-1st-lvl-hp, add:+ 12 cons-mod
+1st-lvl-hp, add:+ 12 constitution-mod
 set-hit-dice, 1d12
 add-profiencies, light-armor
 add-profiencies, medium armor
@@ -15,7 +15,7 @@ add-skill-choice, Perception
 add-skill-choice, Survival
 inc-skill-choice, 2
 add-ability, Rage, 2
-set-ac, add:+ 10 dex-mod cons-mod
+set-ac, add:+ 10 dexterity-mod constitution-mod
 roll-gold, 2d4, 10
 choose, add-item greataxe 1, add-item any-martial-weapon 1
 choose, add-item handaxe 2, add-item any-simple-weapon 1
