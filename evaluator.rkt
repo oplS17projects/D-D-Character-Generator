@@ -57,8 +57,12 @@
       [(add-item? exp) (add-item exp)]
       [(roll-gold? exp) (roll-gold exp)]
       [(isMod? exp) (string->mod exp)]
-      ;[(string->number exp) (string->number exp)]
+      [(isSetHp? exp) (setHP exp)]
+      [(add-profiencies? exp) (add-profiencies exp)]
       [(self-eval? exp) (self-eval exp)]
+      [(set-hit-dice? exp) (set-hit-dice exp)]
+      [(set-skill-proficient? exp) (set-skill-proficient exp)]
+      [(add-note? exp) (add-note exp)]
       [else (begin
               (display "Failed on: " )
               (display exp)
@@ -124,14 +128,6 @@
 (define (roll-gold exp) ;Need to actually add gold to inventory
   (proclst (map (lambda (n) (evaluator n)) (map (lambda (n) (remove-white-space n)) (cdr exp))) *))
 
-
-(define (1st-lvl-hp? exp)
-  (if-exp-match? exp "1st-lvl-hp"))
-
-(define (1st-lvl-hp exp) ; Set var hp to the actual hp
-  (define hp (evaluator (cdr exp)))
-  hp)
-
 (define (getstat str)
   ; Would refrence hash to get relevant stat
   ; Ie, (hash-get stat str)
@@ -152,6 +148,75 @@
   (floor (/ (- (getstat str) 10) 2))
   )
 
+(define (isSetHp? exp)
+  (or (if-exp-match? exp "setHP") (if-exp-match? exp "1st-lvl-hp")))
+
+(define (setHP exp) ; Would change stat in hash table to the following value value
+  (display "Setting HP to: ")
+  (display (evaluator (just-string-to-csv (car (cdr exp)))))
+  (display "\n")
+)
+
+(define (getHP) ; Would lookup hp in hash table and return value, for now returning 10
+  10
+  )
+
+(define (add-profiencies? exp)
+  (if-exp-match? exp "add-profiencies"))
+
+(define (add-profiencies exp)
+  ; Would add profiency to list of profiencies
+  ; instead print it out
+  (display "Add profiency to list of profiencies")
+  (display (car (cdr exp)))
+  (display "\n")
+  )
+
+(define (set-hit-dice? exp)
+  (if-exp-match? exp "set-hit-dice"))
+
+(define (set-hit-dice exp) ; Would set the relephant hash in the table to this value
+  (display "Setting hit dice to: ")
+  (display (car (cdr exp)))
+  (display "\n")
+  )
+
+(define (set-skill-proficient? exp)
+  (or (if-exp-match? exp "add-skill") (if-exp-match? exp "set-skill-prof")))
+
+(define (set-skill-proficient exp) ; Would refrence hash table for skills and mark them proficient
+  (display "Setting skill to proficient: ")
+  (display (car (cdr exp)))
+  (display "\n"))
+
+(define (add-note? exp)
+  (if-exp-match? exp "add-note"))
+
+(define (add-note exp) ; Needs to add note to table, for now just prints it out
+  (display "Adding the following note: ")
+  (display (car (cdr exp)))
+  (display "\n"))
+
+
+(define choice-list (list))
+(define choice-count 0)
+
+(define (add-to-choice-list exp)
+  1
+  )
+
+(define (inc-choice-counter exp)
+  (set! choice-count (car (cdr exp)))
+  (eval-choices))
+
+(define (eval-choices) ; Using list and counter above instead of hash table
+  (if (or (null? choice-list) (= choice-count 0))
+      (begin
+        (set! choice-list (list))
+        (set! choice-count 0))
+      (map (lambda (n) (evaluator n)) (take (shuffle choice-list) choice-count))
+  ))
+
 ; END TODO
 
 (define (isMod? exp)
@@ -171,6 +236,7 @@
 (define (self-eval exp)
   (cond
     [(string->number exp) (string->number exp)]
+    [(string=? "getHP" exp) (getHP)]
     [else exp]
     ))
 
@@ -195,6 +261,9 @@
   (if (eq? numdice 0)
       0
       (+ (+ 1 (random  dicesize)) (roll (- numdice 1) dicesize))))
+
+(define (just-string-to-csv exp)
+  (car (csv->list (string-join (map (lambda (n) (remove-white-space n)) (string-split exp " ")) ","))))
 
 ; File Functions
 ; Get List of Files
