@@ -42,7 +42,8 @@
 ; main window
 (define main (new frame% [label "D & D Character Generator"]
                   [width 560]
-                  [height 300]))
+                  [height 300]
+                  ))
 
 ; panel for logo
 (define logoPanel (new horizontal-panel% [parent main]
@@ -129,6 +130,22 @@
                       [parent genPanel]
                       [callback (λ  (b e)
                                   (genCS #t))]))
+
+; closes character sheet button
+(define closeSheet (new button%
+                        [label "Close Character Sheet"]
+                        [parent genPanel]
+                        [callback (λ (b e)
+                                    (genCS #f))]))
+; Exits application button
+(define Exit (new button%
+                  [label "Exit"]
+                  [parent genPanel]
+                  [callback (λ (b e)
+                              (begin (stop)
+                                      (set! mainOn #f)
+                                      (send main show mainOn)
+                                      exit))]))
 
 ; displays main window
 (send main show mainOn)
