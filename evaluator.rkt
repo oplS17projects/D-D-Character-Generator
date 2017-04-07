@@ -118,15 +118,47 @@
 (define (add-item? exp)
   (if-exp-match? exp "add-item"))
 
-(define (add-item exp) ;Need to actually add item to inventory
-  (display (string-append "Adding item  " (cadr exp) ", of quantity " (caddr exp) ".\n")))
+(define inventorylist (list))
 
+(define (add-item exp) ;Need to actually add item to inventory, adds item to list ^
+  ;(display (string-append "Adding item  " (cadr exp) ", of quantity " (caddr exp) ".\n"))
+  (define itrnum (IsInInventory? (cadr exp) inventorylist))
+  (define currentitem 0)
+  (if itrnum
+      (begin
+        (set! currentitem (list-ref inventorylist itrnum))
+        (RemoveFromInv currentitem)
+        (set! currentitem (cons (car currentitem) (+ (caddr exp) (cdr currentitem))))
+        (set! inventorylist (cons currentitem inventorylist)))
+      (set! inventorylist (cons (cons (cadr exp) (caddr exp)) inventorylist))))
+
+(define (IsInInventory? str lst)
+  (define itrnum 0)
+  (if (null? lst)
+      #f
+      (if (string=? (caar lst) "Gold")
+          itrnum
+          (begin
+            (set! itrnum (+ itrnum 1))
+            (IsInInventory? str (cdr lst))))))
+
+(define (RemoveFromInv itm)
+  (remove itm inventorylist))
 
 (define (roll-gold? exp)
   (if-exp-match? exp "roll-gold"))
 
 (define (roll-gold exp) ;Need to actually add gold to inventory
-  (proclst (map (lambda (n) (evaluator n)) (map (lambda (n) (remove-white-space n)) (cdr exp))) *))
+  (define goldnum (proclst (map (lambda (n) (evaluator n)) (map (lambda (n) (remove-white-space n)) (cdr exp))) *))
+;  (define currentgold 0)
+;  (define itrnum (IsInInventory? "Gold" inventorylist))      
+;  (if itrnum
+;      (begin
+;        (set! currentgold (list-ref inventorylist itrnum))
+;        (RemoveFromInv currentgold)
+;        (set! currentgold (cdr currentgold))
+;        (evaluator (list "add-item" "Gold" (+ currentgold goldnum))))
+      (evaluator (list "add-item" "Gold" goldnum)))
 
 (define (getstat str)
   ; Would refrence hash to get relevant stat
@@ -202,8 +234,7 @@
 (define choice-count 0)
 
 (define (add-to-choice-list exp)
-  1
-  )
+  1)
 
 (define (inc-choice-counter exp)
   (set! choice-count (car (cdr exp)))
