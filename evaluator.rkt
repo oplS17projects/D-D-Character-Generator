@@ -122,28 +122,29 @@
 
 (define (add-item exp) ;Need to actually add item to inventory, adds item to list ^
   ;(display (string-append "Adding item  " (cadr exp) ", of quantity " (caddr exp) ".\n"))
-  (define itrnum (IsInInventory? (cadr exp) inventorylist))
+  (define inputitem (cons (remove-beginning-white-space (cadr exp)) (remove-beginning-white-space (caddr exp))))
+  (define itrnum (IsInInventory? (car inputitem) inventorylist))
   (define currentitem 0)
   (if itrnum
       (begin
         (set! currentitem (list-ref inventorylist itrnum))
         (RemoveFromInv currentitem)
-        (set! currentitem (cons (car currentitem) (+ (caddr exp) (cdr currentitem))))
+        (set! currentitem (cons (car currentitem) (+ (if-str-then-num (cdr inputitem)) (if-str-then-num (cdr currentitem)))))
         (set! inventorylist (cons currentitem inventorylist)))
-      (set! inventorylist (cons (cons (cadr exp) (caddr exp)) inventorylist))))
+      (set! inventorylist (cons inputitem inventorylist))))
 
 (define (IsInInventory? str lst)
   (define itrnum 0)
   (if (null? lst)
       #f
-      (if (string=? (caar lst) "Gold")
+      (if (string=? (caar lst) str)
           itrnum
           (begin
             (set! itrnum (+ itrnum 1))
             (IsInInventory? str (cdr lst))))))
 
 (define (RemoveFromInv itm)
-  (remove itm inventorylist))
+  (set! inventorylist (remove itm inventorylist)))
 
 (define (roll-gold? exp)
   (if-exp-match? exp "roll-gold"))
@@ -336,6 +337,16 @@
 (define (remove-white-space str)
   (if (string? str)
       (list->string (filter (lambda (c) (not (char-whitespace? c))) (string->list str)))
+      str))
+
+(define (remove-beginning-white-space str)
+  (if (string? str)
+      (string-trim str #:right? #f)
+      str))
+
+(define (if-str-then-num str)
+  (if (string? str)
+      (string->number str)
       str))
 
 (provide (all-defined-out))
