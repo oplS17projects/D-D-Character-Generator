@@ -9,7 +9,7 @@ set-saving-throw, strength
 set-saving-throw, constitution
 add-skill-choice, Animal Handling
 add-skill-choice, Athletics
-add-skill-choice, Intimidation
+add-skill-choice, intimidaiton
 add-skill-choice, Nature
 add-skill-choice, Perception
 add-skill-choice, Survival
@@ -17,7 +17,8 @@ inc-skill-choice, 2
 add-ability, Rage, 2
 set-ac, add:+ 10 dexterity-mod constitution-mod
 roll-gold, 2d4, 10
-choose, add-item greataxe 1, add-item any-martial-weapon 1
-choose, add-item handaxe 2, add-item any-simple-weapon 1
+choose, add-weapon greataxe 1, add-weapon any*-martial-weapon 1
+choose, add-weapon handaxe 2, add-weapon any*-simple-weapon 1
 add-item, explorer's pack, 1
-add-item, javelin, 4
+add-weapon, javelin, 4
+set-proficiency-bonus, 2

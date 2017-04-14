@@ -11,24 +11,27 @@
 ;     
 ;(define (next-row path)
 ;  (make-food-csv-reader (open-input-file path)))
-
+(require "HashTableDefinitions.rkt")
 
 ; Static Vars
 (define nil '())
 (define folder-base "DND")
 
-; Relevant Structs
+; Relevant Structs - will be deleted when this is cleaned up
 (define-struct Stat-Struct (Num IsSavingThrow) #:transparent)
 (define-struct Skill-Struct (IsProficient ParentSkillName) #:transparent)
 
 ; Generate Stats List
 (define (generatestats)
-  (define stats-file (string-append folder-base "/stats.csv"))
-  (define stats-roll (car (csv->list (open-input-file (string-append folder-base "/statsroll.csv")))))
-  (csv-map (lambda (n)
-              (cons
-               (car n)
-               (make-Stat-Struct (evaluator stats-roll) #f))) (open-input-file stats-file))
+  (begin
+    (set-stat 'strength (diceroll"3d6") #f)
+    (set-stat 'dexterity (diceroll"3d6") #f)
+    (set-stat 'constitution (diceroll"3d6") #f)
+    (set-stat 'wisdom (diceroll"3d6") #f)
+    (set-stat 'intelligence (diceroll"3d6") #f)
+    (set-stat 'charisma (diceroll"3d6") #f)
+  )
+  "Ok\n"
   )
 
 ; Generate Skill List
@@ -55,6 +58,7 @@
       [(sub:? exp) (sub:- exp)]
       [(choose? exp) (choose exp)]
       [(add-item? exp) (add-item exp)]
+      [(add-weapon? exp) (add-weapon exp)]
       [(roll-gold? exp) (roll-gold exp)]
       [(isMod? exp) (string->mod exp)]
       [(isSetHp? exp) (setHP exp)]
@@ -62,7 +66,12 @@
       [(self-eval? exp) (self-eval exp)]
       [(set-hit-dice? exp) (set-hit-dice exp)]
       [(set-skill-proficient? exp) (set-skill-proficient exp)]
+      [(set-saving-throw? exp) (set-saving-throw exp)]
+      [(add-skill-choice? exp) (add-to-choice-skill-list exp)]
+      [(inc-skill-choice? exp) (inc-choice-counter exp)]
+      [(add-ability? exp) (add-ability exp)]
       [(add-note? exp) (add-note exp)]
+      [(set-ac? exp) (set-ac exp)]
       [else (begin
               (display "Failed on: " )
               (display exp)
@@ -111,87 +120,47 @@
 (define (string->csvlist str)
   (string-split str " "))
 
-
-; Begin TODO
-; Inventory functions, this is a mockup and not the final product!!!!
+; Inventory functions
 
 (define (add-item? exp)
   (if-exp-match? exp "add-item"))
 
-(define inventorylist (list))
-
-(define (add-item exp) ;Need to actually add item to inventory, adds item to list ^
-  ;(display (string-append "Adding item  " (cadr exp) ", of quantity " (caddr exp) ".\n"))
+(define (add-item exp) ; Adds item and quantitty to inventory
   (define inputitem (cons (remove-beginning-white-space (cadr exp)) (remove-beginning-white-space (caddr exp))))
-  (define itrnum (IsInInventory? (car inputitem) inventorylist))
-  (define currentitem 0)
-  (if itrnum
-      (begin
-        (set! currentitem (list-ref inventorylist itrnum))
-        (RemoveFromInv currentitem)
-        (set! currentitem (cons (car currentitem) (+ (if-str-then-num (cdr inputitem)) (if-str-then-num (cdr currentitem)))))
-        (set! inventorylist (cons currentitem inventorylist)))
-      (set! inventorylist (cons inputitem inventorylist))))
+  (add-item-to-hash (car inputitem) (cdr inputitem)))
 
-(define (IsInInventory? str lst)
-  (define itrnum 0)
-  (if (null? lst)
-      #f
-      (if (string=? (caar lst) str)
-          itrnum
-          (begin
-            (set! itrnum (+ itrnum 1))
-            (IsInInventory? str (cdr lst))))))
+(define (add-weapon? exp)
+  (if-exp-match? exp "add-weapon"))
 
-(define (RemoveFromInv itm)
-  (set! inventorylist (remove itm inventorylist)))
+(define (add-weapon exp) ; Adds item and quantitty to inventory
+  (define inputitem (cons (remove-beginning-white-space (cadr exp)) (remove-beginning-white-space (caddr exp))))
+  (add-weapon-to-hash (car inputitem) (cdr inputitem)))
 
 (define (roll-gold? exp)
   (if-exp-match? exp "roll-gold"))
 
-(define (roll-gold exp) ;Need to actually add gold to inventory
+(define (roll-gold exp) ; Evaluates the amount of gold and adds it to the inventory
   (define goldnum (proclst (map (lambda (n) (evaluator n)) (map (lambda (n) (remove-white-space n)) (cdr exp))) *))
-;  (define currentgold 0)
-;  (define itrnum (IsInInventory? "Gold" inventorylist))      
-;  (if itrnum
-;      (begin
-;        (set! currentgold (list-ref inventorylist itrnum))
-;        (RemoveFromInv currentgold)
-;        (set! currentgold (cdr currentgold))
-;        (evaluator (list "add-item" "Gold" (+ currentgold goldnum))))
-      (evaluator (list "add-item" "Gold" goldnum)))
+  (evaluator (list "add-item" "Gold" goldnum)))
 
 (define (getstat str)
-  ; Would refrence hash to get relevant stat
-  ; Ie, (hash-get stat str)
-  ; for now, using str as a number to test
-  (if (number? str)
-      str
-      (cond
-        [(string=? str "strength") 20]
-        [(string=? str "dexterity") 16]
-        [(string=? str "constitution") 12]
-        [(string=? str "intelligence") 8]
-        [(string=? str "wisdom") 4]
-        [(string=? str "charisma") 10]
-        [else 36]))
+  (get-stat str)
   )
 
 (define (getmod str)
-  (floor (/ (- (getstat str) 10) 2))
+  (floor (/ (- (car (getstat str)) 10) 2))
   )
 
 (define (isSetHp? exp)
   (or (if-exp-match? exp "setHP") (if-exp-match? exp "1st-lvl-hp")))
 
 (define (setHP exp) ; Would change stat in hash table to the following value value
-  (display "Setting HP to: ")
-  (display (evaluator (just-string-to-csv (car (cdr exp)))))
-  (display "\n")
+  (define hp (evaluator (just-string-to-csv (car (cdr exp)))))
+  (hash-set! hash-base 'character-hp hp)
 )
 
 (define (getHP) ; Would lookup hp in hash table and return value, for now returning 10
-  10
+  (hash-ref hash-base 'character-hp)
   )
 
 (define (add-profiencies? exp)
@@ -200,56 +169,79 @@
 (define (add-profiencies exp)
   ; Would add profiency to list of profiencies
   ; instead print it out
-  (display "Add profiency to list of profiencies")
-  (display (car (cdr exp)))
-  (display "\n")
+  (hash-set! hash-proficiencies-list (cdr exp) (cdr exp))
   )
 
 (define (set-hit-dice? exp)
   (if-exp-match? exp "set-hit-dice"))
 
 (define (set-hit-dice exp) ; Would set the relephant hash in the table to this value
-  (display "Setting hit dice to: ")
-  (display (car (cdr exp)))
-  (display "\n")
+  (hash-set! hash-base 'character-hit-dice (cadr exp))
+  "set-hit-dice Ok\n"
   )
 
 (define (set-skill-proficient? exp)
   (or (if-exp-match? exp "add-skill") (if-exp-match? exp "set-skill-prof")))
 
 (define (set-skill-proficient exp) ; Would refrence hash table for skills and mark them proficient
-  (display "Setting skill to proficient: ")
-  (display (car (cdr exp)))
-  (display "\n"))
+  (set-skill-prof (cadr exp) #t)
+  "set-skill-prof Ok\n")
 
 (define (add-note? exp)
   (if-exp-match? exp "add-note"))
 
 (define (add-note exp) ; Needs to add note to table, for now just prints it out
-  (display "Adding the following note: ")
-  (display (car (cdr exp)))
-  (display "\n"))
+  (add-note-to-hash (cadr exp))
+  "Ok\n")
 
+(define (is-this-in-list-string this lst) ; Used for filtering through the choice list against proficient skills
+  (define itm this)
+  (define fst "")
+  (if (null? lst)
+      #t
+      (begin
+        (cond [(symbol? itm) (set! itm (symbol->string itm))])
+        (if (symbol? (car lst))
+            (set! fst (symbol->string (car lst)))
+            (set! fst (car lst)))
+        (if (string=? itm fst)
+            #f
+            (is-this-in-list-string this (cdr lst))))))
 
-(define choice-list (list))
-(define choice-count 0)
+(define (add-skill-choice? exp)
+  (if-exp-match? exp "add-skill-choice"))
 
-(define (add-to-choice-list exp)
-  1)
+(define (add-to-choice-skill-list exp)
+  (add-skill-choice (cdr exp)))
+
+(define (inc-skill-choice? exp)
+  (if-exp-match? exp "inc-skill-choice"))
 
 (define (inc-choice-counter exp)
-  (set! choice-count (car (cdr exp)))
-  (eval-choices))
+  (define num (car (cdr exp)))
+  (define lst (filter (lambda (n) (is-this-in-list-string n (get-list-of-prof-names)))
+                      (map (lambda (n)
+                             (string->symbol (string-downcase (remove-beginning-white-space (car (cdr n))))))
+                             (hash->list hash-choice-lists))))
+  (begin
+    (cond [(string? num) (set! num (string->number (remove-beginning-white-space num)))])
+    (eval-choices-skills num lst)
+    (hash-clear! hash-choice-lists)
+    "inc choices Ok\n"))
 
-(define (eval-choices) ; Using list and counter above instead of hash table
-  (if (or (null? choice-list) (= choice-count 0))
-      (begin
-        (set! choice-list (list))
-        (set! choice-count 0))
-      (map (lambda (n) (evaluator n)) (take (shuffle choice-list) choice-count))
-  ))
-
-; END TODO
+(define (eval-choices-skills num lst) ; Using list and counter above instead of hash table
+  (define lists "")
+  (if (or (= num 0) (null? lst))
+      "Eval choices Ok\n"
+     (begin
+       (set! lists (shuffle lst))
+       (display (car lists))
+       (display " ")
+       (display num)
+       (display "\n\n")
+       (set-skill-prof (car lists) #t)
+       (eval-choices-skills (- num 1) (cdr lists))
+       )))
 
 (define (isMod? exp)
   (if (list? exp)
@@ -271,6 +263,27 @@
     [(string=? "getHP" exp) (getHP)]
     [else exp]
     ))
+
+(define (set-saving-throw? exp)
+  (if-exp-match? exp "set-saving-throw"))
+
+(define (set-saving-throw exp)
+  (set-stat (remove-beginning-white-space (car (cdr exp))) (get-stat-num (remove-beginning-white-space (car (cdr exp)))) #t))
+
+(define (add-ability? exp)
+  (if-exp-match? exp "add-ability"))
+
+(define (add-ability exp)
+  (hash-set! hash-abilities (cadr exp) (string->number (remove-beginning-white-space (car (cddr exp))))))
+
+(define (set-ac? exp)
+  (if-exp-match? exp "set-ac"))
+
+(define (set-ac exp)
+  (hash-set! hash-base 'character-armor-class-eval (just-string-to-csv (car (cdr exp))))
+  (hash-set! hash-base 'character-armor-class (evaluator (hash-ref hash-base 'character-armor-class-eval)))
+  "set-ac Ok\n"
+  )
 
 ; Diceroll?
 (define (diceroll? dr)
@@ -349,4 +362,119 @@
       (string->number str)
       str))
 
+(define (re-eval)
+  (begin
+    (hash-set! hash-base 'character-armor-class (evaluator (hash-ref hash-base 'character-armor-class-eval)))
+    "Reeval Ok\n"))
+
+; Setting and evaluating race, class, armor
+(define (set-class-init pr)
+  (begin
+    (hash-set! hash-base 'character-class (string-titlecase (car pr)))
+    (hash-set! hash-base 'character-level 1)
+    (csv-map evaluator (open-input-file (string-append (path->string (cdr pr)) "/level1.csv")))
+    "Set-class Ok\n"
+    ))
+
+(define (set-class-level pr lvl)
+  (begin
+    (hash-set! hash-base 'character-class (string-titlecase (car pr)))
+    (csv-map evaluator (open-input-file (string-append* (path->string (cdr pr)) "/level" (number->string lvl) ".csv" (list))))
+    "Set-class Ok\n"
+    ))
+
+(define (set-background-init pr)
+  (begin
+    (hash-set! hash-base 'character-background (string-titlecase (car pr)))
+    (csv-map evaluator (open-input-file (string-append (path->string (cdr pr)) "/data.csv")))
+    "Set-background Ok\n"
+    ))
+
+(define (set-race-init pr)
+  (begin
+    (hash-set! hash-base 'character-race (string-titlecase (car pr)))
+    (csv-map evaluator (open-input-file (string-append (path->string (cdr pr)) "/data.csv")))
+    "Set-race Ok\n"
+    ))
+
 (provide (all-defined-out))
+
+(define (print-info) ;Example print out function
+  (begin
+  (display "The character has the following information:\n\n\n Base stats:\n")
+  (display "The character's class is: ") (display (hash-ref hash-base 'character-class))
+  (display "\nThe character's race is: ") (display (hash-ref hash-base 'character-race))
+  (display "\nThe character's background is: ") (display (hash-ref hash-base 'character-background))
+  (display "\nThe character's overall proficiency-bonus is: ") (display (hash-ref hash-base 'character-proficiency-bonus))
+  (display "\nThe character's hp is: ") (display (hash-ref hash-base 'character-hp))
+  (display "\nThe character's hit-dice is: ") (display (hash-ref hash-base 'character-hit-dice))
+  (display "\nThe character's armor class is: ") (display (hash-ref hash-base 'character-armor-class))
+  (display "\nThe character's level is: ") (display (hash-ref hash-base 'character-level))
+
+  (display "\n\nThe characters stats are the following: \n")
+  (for-each
+   (lambda (n)
+         (display "\nStat name: ") (display (substring (symbol->string (car n)) 5))
+         (display "\nStat number: ") (display (get-stat-num (substring (symbol->string (car n)) 5)))
+         (display "\nStat mod: ") (display (get-stat-mod (substring (symbol->string (car n)) 5)))
+         (display "\nIs saving throw: ") (display (cddr n))
+         (display "\n"))
+   (hash->list hash-stats))
+
+  (display "\nThe full list of character skills are: \n")
+  (for-each
+   (lambda (n)
+     (display "Skill name: ") (display (car n))
+     (display "\nSkill parent: ") (display (cadr n))
+     (display "\nIs proficient: ") (display (cddr n))
+     (display "\nSkill modifier: ") (display (get-skill-mod (car n)))
+     (display "\n"))
+   (hash->list hash-skills))
+
+  (display "\nThe following is a condensed list of character's proficient skills: \n")
+  (for-each
+   (lambda (n)
+     (display n)
+     (display "\n"))
+   (get-list-of-prof-names))
+  (display "\n\n")
+
+  (display "\nThe full list of the character's inventory: \n")
+  (for-each
+   (lambda (n)
+           (display "Item name: ") (display (car n))
+           (display "\nItem quantity: ") (display (cddr n))
+           (display "\n"))
+   (hash->list hash-inventory))
+
+    (display "\n\nThe full list of the character's weapons: \n")
+  (for-each
+   (lambda (n)
+           (display "Weapon name: ") (display (car n))
+           (display "\nWeapon quantity: ") (display (cddr n))
+           (display "\n"))
+   (hash->list hash-weapons))
+
+  (display "Character abilities and uses: \n")
+  (for-each
+   (lambda (n)
+     (display "Ability name: ") (display (car n))
+     (display " with ") (display (cdr n))
+     (display " uses.\n"))
+   (hash->list hash-abilities))
+  
+  (display "\nNotes and proficiencies: \n")
+  (for-each
+   (lambda (n)
+     (begin
+       (display (car (cdr n)))
+       (display "\n")))
+   (hash->list hash-notes))
+  (for-each
+   (lambda (n)
+     (begin
+       (display (car (cdr n)))
+       (display "\n")))
+   (hash->list hash-proficiencies-list))
+  
+  ))
