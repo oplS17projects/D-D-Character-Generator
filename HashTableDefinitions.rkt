@@ -1,11 +1,12 @@
 #lang racket
-
 (define hash-base (make-hash)) ; hash-hash is the hash used for the table
 
  ; fn to easily init variables
 (define (hash-base-init sym) (hash-set! hash-base sym ""))
 
 ; defining base character variables
+(hash-base-init 'character-name)
+(hash-base-init 'player-name)
 (hash-base-init 'character-class)
 (hash-base-init 'character-race)
 (hash-base-init 'character-background)
@@ -14,7 +15,7 @@
 (hash-base-init 'character-hit-dice)
 (hash-base-init 'character-armor-class)
 (hash-base-init 'character-armor-class-eval)
-(hash-base-init 'character-level)
+(hash-set! hash-base 'character-level 1)
 
 ; define base stats
 (define hash-stats (make-hash))
@@ -162,5 +163,30 @@
       (hash-set! hash-weapons item (cons item qty))))
 
 
+(define (set-hash-base ability value)
+  (cond ((equal? ability "class") (hash-set! hash-base 'character-class value))
+        ((equal? ability "race") (hash-set! hash-base 'character-race value))
+        ((equal? ability "background") (hash-set! hash-base 'character-background value))
+        ((equal? ability "character-proficieny-bonus") (hash-set! hash-base 'character-proficiency-bonus value))
+        ((equal? ability "hp") (hash-set! hash-base 'character-hp value))
+        ((equal? ability "hit-dice") (hash-set! hash-base 'character-hit-dice value))
+        ((equal? ability "armor-class") (hash-set! hash-base 'character-armor-class value))
+        ((equal? ability "armor-class-eval") (hash-set! hash-base 'character-armor-class-eval value))
+        ((equal? ability "character-name") (hash-set! hash-base 'character-name value))
+        ((equal? ability "player-name") (hash-set! hash-base 'player-name value))
+        ))
+
+(define (get-hash-base ability)
+  (cond ((equal? ability "class") (hash-ref hash-base 'character-class))
+        ((equal? ability "race") (hash-ref hash-base 'character-race))
+        ((equal? ability "background") (hash-ref hash-base 'character-background))
+        ((equal? ability "character-proficieny-bonus") (hash-ref hash-base 'character-proficiency-bonus))
+        ((equal? ability "hp") (hash-ref hash-base 'character-hp))
+        ((equal? ability "hit-dice") (hash-ref hash-base 'character-hit-dice))
+        ((equal? ability "armor-class") (hash-ref hash-base 'character-armor-class))
+        ((equal? ability "armor-class-eval") (hash-ref hash-base 'character-armor-class-eval))
+        ((equal? ability "character-name") (hash-ref hash-base 'character-name))
+        ((equal? ability "player-name") (hash-ref hash-base 'player-name))
+        ))
 
 (provide (all-defined-out))

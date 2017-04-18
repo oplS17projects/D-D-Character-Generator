@@ -155,11 +155,11 @@
   (or (if-exp-match? exp "setHP") (if-exp-match? exp "1st-lvl-hp")))
 
 (define (setHP exp) ; Would change stat in hash table to the following value value
-  (define hp (evaluator (just-string-to-csv (car (cdr exp)))))
+  (define hp (evaluator (just-string-to-csv (car ((cdr exp))))))
   (hash-set! hash-base 'character-hp hp)
 )
 
-(define (getHP) ; Would lookup hp in hash table and return value, for now returning 10
+(define getHP ; Would lookup hp in hash table and return value, for now returning 10
   (hash-ref hash-base 'character-hp)
   )
 
