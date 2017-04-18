@@ -367,6 +367,28 @@
     (hash-set! hash-base 'character-armor-class (evaluator (hash-ref hash-base 'character-armor-class-eval)))
     "Reeval Ok\n"))
 
+(define (reset-hash-table)
+  (for-each ;reset base stats
+   (lambda (n)
+     (hash-set! hash-base n ""))
+   (hash->list hash-base))
+  (hash-set! hash-base 'character-proficiency-bonus 0)
+  
+  (for-each ;reset skills
+   (lambda (n)
+     (set-skill-prof n #f))
+   (hash->list hash-skills))
+
+  (hash-clear! hash-inventory)
+  (hash-clear! hash-choice-lists)
+  (hash-clear! hash-notes)
+  (hash-clear! hash-abilities)
+  (hash-clear! hash-weapons)
+
+  
+  "Reset OK\n"
+  )
+
 ; Setting and evaluating race, class, armor
 (define (set-class-init pr)
   (begin
@@ -396,6 +418,9 @@
     (csv-map evaluator (open-input-file (string-append (path->string (cdr pr)) "/data.csv")))
     "Set-race Ok\n"
     ))
+
+(define (get-text-file pr)
+  (file->string (string-append (path->string (cdr pr)) "/info.txt")))
 
 (provide (all-defined-out))
 
