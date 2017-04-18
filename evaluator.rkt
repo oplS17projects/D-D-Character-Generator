@@ -72,6 +72,9 @@
       [(add-ability? exp) (add-ability exp)]
       [(add-note? exp) (add-note exp)]
       [(set-ac? exp) (set-ac exp)]
+      [(set-proficiency-bonus? exp) (set-proficiency-bonus exp)]
+      [(inc-health? exp) (inc-health exp)]
+      [(skill-choice? exp) (skill-choice exp)]
       [else (begin
               (display "Failed on: " )
               (display exp)
@@ -152,16 +155,23 @@
   )
 
 (define (isSetHp? exp)
-  (or (if-exp-match? exp "setHP") (if-exp-match? exp "1st-lvl-hp")))
+  (or (if-exp-match? exp "setHP") (if-exp-match? exp "1st-lvl-hp") (if-exp-match? exp "set-HP")))
 
 (define (setHP exp) ; Would change stat in hash table to the following value value
-  (define hp (evaluator (just-string-to-csv (car ((cdr exp))))))
+  (define hp (evaluator (just-string-to-csv (car (cdr exp)))))
   (hash-set! hash-base 'character-hp hp)
 )
 
-(define getHP ; Would lookup hp in hash table and return value, for now returning 10
+(define (getHP) ; Would lookup hp in hash table and return value, for now returning 10
   (hash-ref hash-base 'character-hp)
   )
+
+(define (inc-health? exp)
+  (if-exp-match? exp "inc-health"))
+
+(define (inc-health exp)
+  ;(setHP
+  (evaluator (just-string-to-csv (string-append "add:+ " (number->string (getHP)) (cadr exp)))))
 
 (define (add-profiencies? exp)
   (if-exp-match? exp "add-profiencies"))
@@ -229,16 +239,36 @@
     (hash-clear! hash-choice-lists)
     "inc choices Ok\n"))
 
+(define (skill-choice? exp)
+  (or (if-exp-match? exp "skill-choice") (if-exp-match? exp "skill-choices")))
+
+(define (skill-choice exp)
+  (define num (car (cdr exp)))
+  (define lst (map
+               (lambda (n)
+                 (string-downcase (remove-beginning-white-space n)))
+               (cddr exp)))
+;  (display lst)
+;  (display "\n")
+  (begin
+    (cond [(string? num) (set! num (string->number (remove-beginning-white-space num)))])
+    (set! lst (filter
+               (lambda (n)
+                 (is-this-in-list-string n (get-list-of-prof-names))) lst))
+;    (display lst)
+;    (display "\n")
+    (eval-choices-skills num lst)))
+
 (define (eval-choices-skills num lst) ; Using list and counter above instead of hash table
   (define lists "")
   (if (or (= num 0) (null? lst))
       "Eval choices Ok\n"
      (begin
        (set! lists (shuffle lst))
-       (display (car lists))
-       (display " ")
-       (display num)
-       (display "\n\n")
+;       (display (car lists))
+;       (display "\n")
+;       (display num)
+;       (display "\n")
        (set-skill-prof (car lists) #t)
        (eval-choices-skills (- num 1) (cdr lists))
        )))
@@ -261,6 +291,7 @@
   (cond
     [(string->number exp) (string->number exp)]
     [(string=? "getHP" exp) (getHP)]
+    [(string=? "hit-dice" exp) (diceroll (hash-ref hash-base 'character-hit-dice))]
     [else exp]
     ))
 
@@ -274,7 +305,10 @@
   (if-exp-match? exp "add-ability"))
 
 (define (add-ability exp)
-  (hash-set! hash-abilities (cadr exp) (string->number (remove-beginning-white-space (car (cddr exp))))))
+  (add-ability-to-hash
+             (cadr exp)
+             (string->number (remove-beginning-white-space (car (cddr exp))))
+             (remove-beginning-white-space (car (cdddr exp)))))
 
 (define (set-ac? exp)
   (if-exp-match? exp "set-ac"))
@@ -284,6 +318,13 @@
   (hash-set! hash-base 'character-armor-class (evaluator (hash-ref hash-base 'character-armor-class-eval)))
   "set-ac Ok\n"
   )
+
+(define (set-proficiency-bonus? exp)
+  (if-exp-match? exp "set-proficiency-bonus"))
+
+(define (set-proficiency-bonus exp)
+  (hash-set! hash-base 'character-proficiency-bonus (string->number (remove-white-space (car (cdr exp)))))
+  "Set Proficiency Ok\n")
 
 ; Diceroll?
 (define (diceroll? dr)
@@ -453,7 +494,7 @@
      (display "\nSkill parent: ") (display (cadr n))
      (display "\nIs proficient: ") (display (cddr n))
      (display "\nSkill modifier: ") (display (get-skill-mod (car n)))
-     (display "\n"))
+     (display "\n\n"))
    (hash->list hash-skills))
 
   (display "\nThe following is a condensed list of character's proficient skills: \n")
@@ -462,7 +503,7 @@
      (display n)
      (display "\n"))
    (get-list-of-prof-names))
-  (display "\n\n")
+  (display "\n\n\n\n")
 
   (display "\nThe full list of the character's inventory: \n")
   (for-each
@@ -480,24 +521,26 @@
            (display "\n"))
    (hash->list hash-weapons))
 
-  (display "Character abilities and uses: \n")
+  (display "\nCharacter abilities and uses: \n")
   (for-each
    (lambda (n)
-     (display "Ability name: ") (display (car n))
-     (display " with ") (display (cdr n))
-     (display " uses.\n"))
+     (display "Ability name: ") (display (car n)) ; Name of ability
+     (display " : ") (display (cadr n)) ; Number
+     (display " " ) (display (cddr n)) ; Uses, known spells, ex: 2 uses, or 2 known
+     (display ".\n")) ; Ex: Rage : 2 uses, Ex: 1st Level Spells : 2 uses, Ex: Spells : 5 known
    (hash->list hash-abilities))
   
   (display "\nNotes and proficiencies: \n")
   (for-each
    (lambda (n)
      (begin
-       (display (car (cdr n)))
+       (display (cdr n))
        (display "\n")))
    (hash->list hash-notes))
   (for-each
    (lambda (n)
      (begin
+       (display "Proficient in: ")
        (display (car (cdr n)))
        (display "\n")))
    (hash->list hash-proficiencies-list))
