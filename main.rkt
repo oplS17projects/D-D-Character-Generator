@@ -1,70 +1,98 @@
 #lang racket
-(require racket/gui)
-(require rsound)
+(require racket/gui rsound "HashTableDefinitions.rkt")
 (include "charsheet.rkt")
 
-(define logo (read-bitmap "./DND/ddlogo.png"))
+; pictures from https://dnd.wizards.com/dungeons-and-dragons/ and D&D Player's handbook 5e
+(define logo (read-bitmap "./DND/ddlogo3.png"))
+(define human (read-bitmap "./DND/Human.png"))
+(define elf (read-bitmap "./DND/Elf.png"))
+(define dwarf (read-bitmap "./DND/Dwarf.png"))
+(define barbarian (read-bitmap "./DND/Barbarian.png"))
 
 ; Johnny Douglas' Dungeons & Dragons cartoon theme
 ; converted from youtube video
 ; https://www.youtube.com/watch?v=v2u7-M7Ouok&t=37s
-(define theme (rs-read "./DND/DDTheme.wav"))
+(define main-theme (rs-read "./DND/DDTheme.wav"))
+(define theme main-theme)
 (play theme)
 
+; defines picture of race
+(define racepic human)
+;sets picture of race
+(define (set-race-pic x) (set! racepic x))
 
-; hash table to contain stats
-(define stats (make-hash))
+;defines picture of class
+(define classpic barbarian)
 
-; gets value in hash table by 
-(define (getStatVal statKey)
-  (hash-ref stats statKey))
+; adjust points to allocate to stats
+(define points-to-allocate 0)
+(define (inc-points)
+  (set! points-to-allocate (add1 points-to-allocate)))
+(define (dec-points)
+  (unless (<= points-to-allocate 0) (set! points-to-allocate (sub1 points-to-allocate))))
 
-; sets key/value pair in hash table
-(define (setStat key val)
-  (hash-set! stats key val))
+; updates points to allocate in points tab panel
+(define (inc-stat-points x)
+  (unless (<= points-to-allocate 0) (begin (inc-stat x) (dec-points) (send points-tally on-paint))))
+(define (dec-stat-points x)
+  (unless (<= (get-stat-num x) 0) (begin (dec-stat x) (inc-points) (send points-tally on-paint))))
+
+
+
+;sets 1st level hp
+(define (set-init-hp)
+  (cond ((equal? (hash-ref hash-base 'character-class) "barbarian")
+         (set-hash-base "hp" (+ (roll 1 12) (getmod "constitution"))))))
+
+; updates stats
+(define (update-stats)
+  (set-hash-base "hp" (+ (get-hp) (getmod "constitution"))))
 
 ; variable to show main screen
 (define mainOn #t)
 
 ; sets race in stats hash table based on radiobox choice
-(define (setRace x)
-  (cond ((eqv? x 0) (setStat "Race" "Human"))
-        ((eqv? x 1) (setStat "Race" "Elf"))
-        ((eqv? x 2) (setStat "Race" "Dwarf"))))
+(define (set-race x)
+  (cond ((eqv? x 0) (begin (set-race-pic human) (set-hash-base "race" "human")))
+        ((eqv? x 1) (begin (set-race-pic elf) (set-hash-base "race" "elf")))
+        ((eqv? x 2) (begin (set-race-pic dwarf) (set-hash-base "race" "dwarf")))))
 
 ; sets class
-(define (setClass x)
-  (cond ((eqv? x 0) (setStat "Class" "Barbarian"))
-        ((eqv? x 1) (setStat "Class" "Cleric"))
-        ((eqv? x 2) (setStat "Class" "Mage"))))
+(define (set-class x)
+  (cond ((eqv? x 0) (set-hash-base "class" "barbarian"))
+        ((eqv? x 1) (set-hash-base "class" "cleric"))
+        ((eqv? x 2) (set-hash-base "class" "mage")))
+  (set-init-hp))
 
 
 ; main window
 (define main (new frame% [label "D & D Character Generator"]
-                  [width 560]
-                  [height 300]
+                  [width 800]
+                  [height 768]
                   ))
 
 ; panel for logo
-(define logoPanel (new horizontal-panel% [parent main]
-                       [min-height 72]))
+(define logo-panel (new horizontal-panel% [parent main]
+                       [min-height 103]))
 
 ; panels for attributes and character generation
-(define choicePanel (new horizontal-panel% [parent main]
-                         [min-height 200]))
-(define genPanel (new horizontal-panel% [parent main]
+(define choice-panel (new horizontal-panel% [parent main]
+                         [min-height 600]))
+(define gen-panel (new horizontal-panel% [parent main]
                       [alignment '(center center)]))
 
 ;draws logo
-(new canvas% [parent logoPanel]
+(new canvas% [parent logo-panel]
     [style '(control-border)]
     [paint-callback
      (λ (canvas dc)
+       (send dc set-background "black")
+       (send dc clear)
      (send dc draw-bitmap logo 0 0))])
 
 ; tabs for various attribute choices
 (define tab (new tab-panel%
-                 [parent choicePanel]
+                 [parent choice-panel]
                  [choices (list "Names"
                                 "Race"
                                 "Class"
@@ -83,66 +111,360 @@
                         [style '(deleted)]))
 (define class-panel (new panel% [parent tab]
                          [style '(deleted)]))
-(define stats-panel (new panel% [parent tab]
+(define stats-panel (new horizontal-panel% [parent tab]
                          [style '(deleted)]))
 
 ; text boxes for character and player names tab
 (define align-name-panel (new vertical-panel% [parent name-panel]))
-(define playerName (new text-field%
+(define player-name (new text-field%
                         [label "Player Name"]
                         [parent align-name-panel]
                         [vert-margin 4]
                         [callback (λ (b e)
-                                    (setStat "Player Name" (send playerName get-value)))]))
+                                    (set-hash-base "player-name" (send player-name get-value)))]))
 
-(define charName (new text-field%
+(define char-name (new text-field%
                         [label "Character Name"]
                         [parent align-name-panel]
                         [vert-margin 4]
                         [callback (λ (b e)
-                                  (setStat "Character Name" (send charName get-value)))]))
+                                  (set-hash-base "character-name" (send char-name get-value)))]))
+
+; race panel setup
+(define splitrace (new horizontal-panel% [parent race-panel]))
+(define l-panel (new panel% [parent splitrace]
+                     [style '(border)]))
+
+(define r-panel (new panel% [parent splitrace]
+                     [style '(border)]))
+
 
 ; choices for race tab
-(define raceBox (new radio-box%
+(define race-box (new radio-box%
                      [label "Race"]
                      [choices (list "Human" "Elf" "Dwarf")]
-                     [parent race-panel]
+                     [parent l-panel]
                      [vert-margin 10]
                      [horiz-margin 5]
                      [style (list 'vertical 'vertical-label)]
+                     [font (make-object font% 20 'roman)]
                      [callback (λ (b e)
-                               (setRace (send raceBox get-selection)))]
-                     ))
+                               (begin (set-race (send race-box get-selection)) (generatestats)
+                                 (new canvas%
+                                      [parent r-panel]
+                                      [min-height 630]
+                                      [min-width 650]
+                                      [paint-callback
+                                      (λ (c dc)
+                                        (send dc draw-bitmap racepic 0 0)
+                                        
+                                       )])
+                                 ))]))
+                          
+; class panel setup
+(define splitclass (new horizontal-panel% [parent class-panel]))
+(define l-c-panel (new panel% [parent splitclass]
+                       [style '(border)]))
+(define r-c-panel (new panel% [parent splitclass]
+                       [style '(border)]))
 
 ; choices for class tab
-(define classBox (new radio-box%
+(define class-box (new radio-box%
                      [label "Class"]
                      [choices (list "Barbarian" "Cleric" "Mage")]
-                     [parent class-panel]
+                     [parent l-c-panel]
                      [style (list 'vertical 'vertical-label)]
+                     [font (make-object font% 20 'roman)]
+                     [selection 0]
                      [callback (λ (b e)
-                               (setClass (send classBox get-selection)))]
+                               (begin (set-class (send class-box get-selection)) (generatestats) (set-init-hp))
+                                 (new canvas%
+                                      [parent r-c-panel]
+                                      [min-height 630]
+                                      [min-width 650]
+                                      [paint-callback
+                                      (λ (c dc)
+                                        (send dc draw-bitmap classpic 0 0)
+                                        
+                                       )])
+                                 )]
                      ))
+
+; tab panel to adjust base stats
+(define l-stats (new vertical-panel% [parent stats-panel]
+                     [style '(border)]
+                     [min-width 300]))
+(define m-stats (new vertical-panel% [parent stats-panel]
+                     [style '(border)]))
+(define r-stats (new vertical-panel% [parent stats-panel]
+                     [style '(border)]
+                     [min-width 300]))
+
+
+
+(define points-panel (new vertical-panel% [parent m-stats]))
+(define str-panel (new horizontal-panel% [parent m-stats]))
+(define str-box (new horizontal-panel% [parent m-stats]))
+(define l-str (new panel% [parent str-box]
+                   [min-width 25]))
+(define str-canvas (new canvas% [parent str-box]
+                        [min-height 20]
+                        [paint-callback (λ (c dc)
+                                    (begin (send dc clear)
+                                           (send dc set-scale 2 2)
+                                           (send dc set-text-foreground "blue")
+                                           (send dc draw-text (number->string (get-stat-num "strength")) 2 0)))]))
+(define r-str (new panel% [parent str-box]
+                   [min-width 25]))
+
+(define dex-panel (new horizontal-panel% [parent m-stats]))
+(define dex-box (new horizontal-panel% [parent m-stats]))
+(define l-dex (new panel% [parent dex-box]
+                   [min-width 25]))
+(define dex-canvas (new canvas% [parent dex-box]
+                        [min-height 20]
+                        [paint-callback (λ (c dc)
+                                    (begin (send dc clear)
+                                           (send dc set-scale 2 2)
+                                           (send dc set-text-foreground "blue")
+                                           (send dc draw-text (number->string (get-stat-num "dexterity")) 2 0)))]))
+(define r-dex (new panel% [parent dex-box]
+                   [min-width 25]))
+
+(define con-panel (new horizontal-panel% [parent m-stats]))
+(define con-box (new horizontal-panel% [parent m-stats]))
+(define l-con (new panel% [parent con-box]
+                   [min-width 25]))
+(define con-canvas (new canvas% [parent con-box]
+                        [min-height 20]
+                        [paint-callback (λ (c dc)
+                                    (begin (send dc clear)
+                                           (send dc set-scale 2 2)
+                                           (send dc set-text-foreground "blue")
+                                           (send dc draw-text (number->string (get-stat-num "constitution")) 2 0)))]))
+(define r-con (new panel% [parent con-box]
+                   [min-width 25]))
+
+(define wis-panel (new horizontal-panel% [parent m-stats]))
+(define wis-box (new horizontal-panel% [parent m-stats]))
+(define l-wis (new panel% [parent wis-box]
+                   [min-width 25]))
+(define wis-canvas (new canvas% [parent wis-box]
+                        [min-height 20]
+                        [paint-callback (λ (c dc)
+                                    (begin (send dc clear)
+                                           (send dc set-scale 2 2)
+                                           (send dc set-text-foreground "blue")
+                                           (send dc draw-text (number->string (get-stat-num "wisdom")) 2 0)))]))
+(define r-wis (new panel% [parent wis-box]
+                   [min-width 25]))
+
+(define int-panel (new horizontal-panel% [parent m-stats]))
+(define int-box (new horizontal-panel% [parent m-stats]))
+(define l-int (new panel% [parent int-box]
+                   [min-width 25]))
+(define int-canvas (new canvas% [parent int-box]
+                        [min-height 20]
+                        [paint-callback (λ (c dc)
+                                    (begin (send dc clear)
+                                           (send dc set-scale 2 2)
+                                           (send dc set-text-foreground "blue")
+                                           (send dc draw-text (number->string (get-stat-num "intelligence")) 2 0)))]))
+(define r-int (new panel% [parent int-box]
+                   [min-width 25]))
+
+(define cha-panel (new horizontal-panel% [parent m-stats]))
+(define cha-box (new horizontal-panel% [parent m-stats]))
+(define l-cha (new panel% [parent cha-box]
+                   [min-width 25]))
+(define cha-canvas (new canvas% [parent cha-box]
+                        [min-height 20]
+                        [paint-callback (λ (c dc)
+                                    (begin (send dc clear)
+                                           (send dc set-scale 2 2)
+                                           (send dc set-text-foreground "blue")
+                                           (send dc draw-text (number->string (get-stat-num "charisma")) 2 0)))]))
+(define r-cha (new panel% [parent cha-box]
+                   [min-width 25]))
+
+(define blank-panel (new panel% [parent m-stats]
+                         [min-height 5]))
+
+(define points-header (new message% [parent l-stats]
+                           [label "Points to Allocate"]
+                           [font (make-object font% 20 'roman)]))
+(define points-pan (new horizontal-panel% [parent l-stats]
+                        [style '(border)]))
+(define points-l-buffer (new panel% [parent points-pan]
+                             [min-width 15]))
+(define points-tally (new canvas% [parent points-pan]
+                          [min-height 50]
+                          [paint-callback (λ (canvas dc)
+                                            (send dc clear)
+                                            (send dc set-text-foreground "blue")
+                                            (send dc set-scale 4 4)
+                                            (send dc draw-text (number->string points-to-allocate) 2 0))]))
+(define points-r-buffer (new panel% [parent points-pan]
+                             [min-width 15]))
+(define blank-points-panel (new panel% [parent l-stats]
+                                [min-height 400]
+                                [style '(border)]))
+
+; panels showing hit points
+(define (get-hp) (get-hash-base "hp"))
+
+(define hp-header (new message% [parent r-stats]
+                       [label "Hit Points"]
+                       [font (make-object font% 20 'roman)]))
+(define hp-pan (new horizontal-panel% [parent r-stats]
+                        [style '(border)]))
+(define hp-l-buffer (new panel% [parent hp-pan]
+                             [min-width 15]))
+(define hp-tally (new canvas% [parent hp-pan]
+                          [min-height 50]
+                          [paint-callback (λ (canvas dc)
+                                            (send dc clear)
+                                            (send dc set-text-foreground "blue")
+                                            (send dc set-scale 4 4)
+                                            (send dc draw-text (number->string (get-hp)) 2 0))]))
+(define hp-r-buffer (new panel% [parent hp-pan]
+                             [min-width 15]))
+(define blank-hp-panel (new panel% [parent r-stats]
+                                [min-height 400]
+                                [style '(border)]))
+
+; adjust strength
+(define dec-str (new button% [parent str-panel]
+                     [label "-"]
+                     [font (make-object font% 15 'roman)]
+                     (callback (λ ( b e)
+                                 (begin (dec-stat-points "strength") (send str-canvas on-paint)
+                                        )))))
+(define str-message (new message% [parent str-panel]
+                         [label "Strength"]
+                         [font (make-object font% 15 'roman)]))
+(define inc-str (new button% [parent str-panel]
+                     [label "+"]
+                     [font (make-object font% 15 'roman)]
+                     (callback (λ (b e)
+                                 (begin (inc-stat-points "strength") (send str-canvas on-paint))))))
+
+; adjust dexterity
+(define dec-dex (new button% [parent dex-panel]
+                     [label "-"]
+                     [font (make-object font% 15 'roman)]
+                     (callback (λ ( b e)
+                                 (begin (dec-stat-points "dexterity") (send dex-canvas on-paint)
+                                        )))))
+(define dex-message (new message% [parent dex-panel]
+                         [label "Dexterity"]
+                         [font (make-object font% 15 'roman)]))
+(define inc-dex (new button% [parent dex-panel]
+                     [label "+"]
+                     [font (make-object font% 15 'roman)]
+                     (callback (λ (b e)
+                                 (begin (inc-stat-points "dexterity") (send dex-canvas on-paint))))))
+
+; adjust constitution
+(define dec-con (new button% [parent con-panel]
+                     [label "-"]
+                     [font (make-object font% 15 'roman)]
+                     (callback (λ ( b e)
+                                 (begin (dec-stat-points "constitution") (send con-canvas on-paint))))))
+                    
+(define con-message (new message% [parent con-panel]
+                         [label "Constitution"]
+                         [font (make-object font% 15 'roman)]))
+(define inc-con (new button% [parent con-panel]
+                     [label "+"]
+                     [font (make-object font% 15 'roman)]
+                     (callback (λ (b e)
+                                 (begin (inc-stat-points "constitution") (send con-canvas on-paint))))))
+
+; adjust wisdom
+(define dec-wis (new button% [parent wis-panel]
+                     [label "-"]
+                     [font (make-object font% 15 'roman)]
+                     (callback (λ ( b e)
+                                 (begin (dec-stat-points "wisdom") (send wis-canvas on-paint))))))
+(define wis-message (new message% [parent wis-panel]
+                         [label "Wisdom"]
+                         [font (make-object font% 15 'roman)]))
+(define inc-wis (new button% [parent wis-panel]
+                     [label "+"]
+                     [font (make-object font% 15 'roman)]
+                     (callback (λ (b e)
+                                 (begin (inc-stat-points "wisdom") (send wis-canvas on-paint))))))
+
+; adjust intelligence
+(define dec-int (new button% [parent int-panel]
+                     [label "-"]
+                     [font (make-object font% 15 'roman)]
+                     (callback (λ ( b e)
+                                 (begin (dec-stat-points "intelligence") (send int-canvas on-paint))))))
+(define int-message (new message% [parent int-panel]
+                         [label "Intelligence"]
+                         [font (make-object font% 15 'roman)]
+                         ))
+(define inc-int (new button% [parent int-panel]
+                     [label "+"]
+                     [font (make-object font% 15 'roman)]
+                     (callback (λ (b e)
+                                 (begin (inc-stat-points "intelligence") (send int-canvas on-paint))))))
+
+; adjust charisma
+(define dec-cha (new button% [parent cha-panel]
+                     [label "-"]
+                     [font (make-object font% 15 'roman)]
+                     (callback (λ ( b e)
+                                 (begin (dec-stat-points "charisma") (send cha-canvas on-paint))))))
+(define cha-message (new message% [parent cha-panel]
+                         [label "Charisma"]
+                         [font (make-object font% 15 'roman)]
+                         ))
+(define inc-cha (new button% [parent cha-panel]
+                     [label "+"]
+                     [font (make-object font% 15 'roman)]
+                     (callback (λ (b e)
+                                 (begin (inc-stat-points "charisma") (send cha-canvas on-paint))))))
+
+; reroll stats button
+(define reroll (new button%
+                    [label "Reroll Stats"]
+                    [parent gen-panel]
+                    [callback (λ (b e)
+                                (begin (generatestats)
+                                       (set-init-hp)
+                                       (set! points-to-allocate 0)
+                                       (send str-canvas on-paint)
+                                       (send dex-canvas on-paint)
+                                       (send con-canvas on-paint)
+                                       (send wis-canvas on-paint)
+                                       (send int-canvas on-paint)
+                                       (send cha-canvas on-paint)
+                                       (send points-tally on-paint)
+                                       (send hp-tally on-paint)))]))
 
 ; character sheet generation button
 (define genSheet (new button%
                       [label "Generate Character Sheet"]
-                      [parent genPanel]
+                      [parent gen-panel]
                       [callback (λ  (b e)
-                                  (genCS #t))]))
+                                  (begin (update-stats) (genCS #t)))]))
 
 ; closes character sheet button
 (define closeSheet (new button%
                         [label "Close Character Sheet"]
-                        [parent genPanel]
+                        [parent gen-panel]
                         [callback (λ (b e)
                                     (genCS #f))]))
 ; Exits application button
 (define Exit (new button%
                   [label "Exit"]
-                  [parent genPanel]
+                  [parent gen-panel]
                   [callback (λ (b e)
                               (begin (stop)
+                                     (genCS #f)
                                       (set! mainOn #f)
                                       (send main show mainOn)
                                       exit))]))
