@@ -38,11 +38,27 @@
   (unless (<= (get-stat-num x) 0) (begin (dec-stat x) (inc-points) (send points-tally on-paint))))
 
 
-
 ;sets 1st level hp
 (define (set-init-hp)
   (cond ((equal? (hash-ref hash-base 'character-class) "barbarian")
          (set-hash-base "hp" (+ (roll 1 12) (getmod "constitution"))))))
+
+; update hp based on change to constitution modifier
+(define (update-hp op)
+  (let* ((old-con-mod (getmod "constitution")) (new-con-mod (calc-mod "constitution" op 1))
+                                               (diff (- new-con-mod old-con-mod)) (base-hp (- (get-hp) old-con-mod))
+                                               (new-base-hp (+ base-hp new-con-mod)))
+    (cond ((not (equal? diff 0)) (unless (<= new-base-hp 0) (set-hash-base "hp" new-base-hp))
+          ))))
+
+; calculates ability modifier based on changes in the modifier
+(define (calc-mod str op num)
+  (floor (/ (- (op (car (getstat str)) num) 10) 2))
+  )
+
+; gets current hp
+(define (get-hp)
+  (get-hash-base "hp"))
 
 ; updates stats
 (define (update-stats)
@@ -311,7 +327,6 @@
                                 [style '(border)]))
 
 ; panels showing hit points
-(define (get-hp) (get-hash-base "hp"))
 
 (define hp-header (new message% [parent r-stats]
                        [label "Hit Points"]
@@ -338,7 +353,7 @@
                      [label "-"]
                      [font (make-object font% 15 'roman)]
                      (callback (λ ( b e)
-                                 (begin (dec-stat-points "strength") (send str-canvas on-paint)
+                                 (begin  (dec-stat-points "strength") (send str-canvas on-paint)
                                         )))))
 (define str-message (new message% [parent str-panel]
                          [label "Strength"]
@@ -347,7 +362,7 @@
                      [label "+"]
                      [font (make-object font% 15 'roman)]
                      (callback (λ (b e)
-                                 (begin (inc-stat-points "strength") (send str-canvas on-paint))))))
+                                 (begin  (inc-stat-points "strength") (send str-canvas on-paint))))))
 
 ; adjust dexterity
 (define dec-dex (new button% [parent dex-panel]
@@ -370,7 +385,8 @@
                      [label "-"]
                      [font (make-object font% 15 'roman)]
                      (callback (λ ( b e)
-                                 (begin (dec-stat-points "constitution") (send con-canvas on-paint))))))
+                                 (begin (update-hp -) (dec-stat-points "constitution")
+                                        (send hp-tally on-paint) (send con-canvas on-paint))))))
                     
 (define con-message (new message% [parent con-panel]
                          [label "Constitution"]
@@ -379,7 +395,8 @@
                      [label "+"]
                      [font (make-object font% 15 'roman)]
                      (callback (λ (b e)
-                                 (begin (inc-stat-points "constitution") (send con-canvas on-paint))))))
+                                 (begin (update-hp +) (inc-stat-points "constitution")
+                                        (send hp-tally on-paint) (send con-canvas on-paint))))))
 
 ; adjust wisdom
 (define dec-wis (new button% [parent wis-panel]
