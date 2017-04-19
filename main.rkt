@@ -13,8 +13,22 @@
 ; converted from youtube video
 ; https://www.youtube.com/watch?v=v2u7-M7Ouok&t=37s
 (define main-theme (rs-read "./DND/DDTheme.wav"))
-(define theme main-theme)
-(play theme)
+
+; "Caramel" by Suzanne Vega from the album "Nine Objects of Desire"
+(define human-theme (rs-read "./DND/Caramel.wav"))
+
+; "Lothlorien" by Enya from the album "Shepherd Moons"
+(define elf-theme (rs-read "./DND/Lothlorien.wav"))
+
+; "Hall of the Mountain King" by Savatage from the album "Hall of the Mountain King"
+(define dwarf-theme (rs-read "./DND/Hall-Of-The-Mountain-King.wav"))
+(define current-theme main-theme)
+
+; plays background theme if different from theme currently playing
+(define (play-theme song)
+  (unless (equal? song current-theme) (begin (stop) (set! current-theme song) (play current-theme))))
+
+(play main-theme)
 
 ; defines picture of race
 (define racepic human)
@@ -48,7 +62,7 @@
   (let* ((old-con-mod (getmod "constitution")) (new-con-mod (calc-mod "constitution" op 1))
                                                (diff (- new-con-mod old-con-mod)) (base-hp (- (get-hp) old-con-mod))
                                                (new-base-hp (+ base-hp new-con-mod)))
-    (cond ((not (equal? diff 0)) (unless (<= new-base-hp 0) (set-hash-base "hp" new-base-hp))
+    (cond ((not (equal? diff 0)) (unless (or (<= new-base-hp 0) (<= points-to-allocate 0)) (set-hash-base "hp" new-base-hp))
           ))))
 
 ; calculates ability modifier based on changes in the modifier
@@ -69,9 +83,9 @@
 
 ; sets race in stats hash table based on radiobox choice
 (define (set-race x)
-  (cond ((eqv? x 0) (begin (set-race-pic human) (set-hash-base "race" "human")))
-        ((eqv? x 1) (begin (set-race-pic elf) (set-hash-base "race" "elf")))
-        ((eqv? x 2) (begin (set-race-pic dwarf) (set-hash-base "race" "dwarf")))))
+  (cond ((eqv? x 0) (begin (set-race-pic human) (set-hash-base "race" "human") (play-theme human-theme)))
+        ((eqv? x 1) (begin (set-race-pic elf) (set-hash-base "race" "elf") (play-theme elf-theme)))
+        ((eqv? x 2) (begin (set-race-pic dwarf) (set-hash-base "race" "dwarf") (play-theme dwarf-theme)))))
 
 ; sets class
 (define (set-class x)
