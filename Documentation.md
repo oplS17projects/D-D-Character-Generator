@@ -3,6 +3,7 @@
 ###Races
 #####Folder: DND/race
 race-name
+
     ├── data.csv
     └── info.txt
 
@@ -14,6 +15,7 @@ info.txt: Text file containing basic description shown in the GUI
 ###Backgrounds
 #####Folder: DND/background
 background-name
+
     ├── data.csv
     └── info.txt
 
@@ -25,6 +27,7 @@ info.txt: Text file containing basic description shown in the GUI
 ###Classes
 ####Folder: DND/class
 class-name
+
     ├── info.txt
     ├── level1.csv
     ├── level2.csv
@@ -62,7 +65,8 @@ function name, other function name (arguments if any) : Description
 		* Sets hp to the current hp + rolling the hit-dice + the constitution mod
 * set-hit-dice (string): Sets the value of the hit dice to the given string
 	* Ex: set-hit-dice, 1d12
-* 
+* set-ac (string): Stores the string as an evaluating string, evaluates the value and stores the armor class
+    * Ex: set-ac, add:+ 10 dexterity-mod constitution-mod
 
 
 ###Skill Evaluator Functions
@@ -90,6 +94,17 @@ function name, other function name (arguments if any) : Description
 * add-profiencies (string): adds the argument to the list of proficiencies
 	* Ex: add-profiencies, light-armor
 		* Notes that the character is proficient in light armor
+* set-skill-proficient, add-skill (string): takes in a skill name as an argument and marks it as proficient
+    *  Ex: add-skill, athletics
+*  set-saving-throw (string): takes in a stat name as an argument and marks it as a saving throw
+    *  Ex: set-saving-throw, strength
+*  add-ability (String, Number, String): Takes in a skill name as the first argument, a number (to be evaluated) as a second argument and a string that states the number. Either uses between rests, spells known etc.
+    *  add-ability, Rage, 2, uses
+        *  The ability Rage can be used twice between long rests
+    *  add-ability, Spells, add:+ wisdom-mod level, total prepared spells
+*  add-note (String): Takes the string and stores it as a relevent note
+    *  add-note, Has Darkvision
+
 
 
 ###Other Evaluator Functions
@@ -114,16 +129,4 @@ function name, other function name (arguments if any) : Description
 	* Ex: if the hit-dice is set to 1d12, returns diceroll of 1d12
 * *-mod
 	* Where * is a stat (strength, dexterity, constitution, wisdom, intelligence, charisma) it will return the stat modifier
-
-
-
-
-# Left to document
-[(set-skill-proficient? exp) (set-skill-proficient exp)]
-[(set-saving-throw? exp) (set-saving-throw exp)]
-[(add-skill-choice? exp) (add-to-choice-skill-list exp)]
-[(inc-skill-choice? exp) (inc-choice-counter exp)]
-[(add-ability? exp) (add-ability exp)]
-[(add-note? exp) (add-note exp)]
-[(set-ac? exp) (set-ac exp)]
-[(set-proficiency-bonus? exp) (set-proficiency-bonus exp)]
+* "level" return the character level
