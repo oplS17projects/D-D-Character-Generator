@@ -80,7 +80,7 @@
 (hash-skills-init 'dception 'charisma #f)
 (hash-skills-init 'history 'intelligence #f)
 (hash-skills-init 'insight 'wisdom #f)
-(hash-skills-init 'intimidaiton 'charisma #f)
+(hash-skills-init 'intimidation 'charisma #f)
 (hash-skills-init 'investigation 'intelligence #f)
 (hash-skills-init 'medicine 'wisdom #f)
 (hash-skills-init 'nature 'intelligence #f)
@@ -92,15 +92,21 @@
 (hash-skills-init 'stealth 'dexterity #f)
 (hash-skills-init 'survival 'wisdom #f)
 (define (set-skill-prof sym prof)
-  (define sk (get-skill sym))
+  (define sym2 sym)
+  (cond [(string? sym2) (set! sym2 (string->symbol sym2))])
+  (define sk (get-skill sym2))
   (if sk
-      (hash-skills-init sym (car sk) prof)
+      (hash-skills-init sym2 (car sk) prof)
       #f
       ))
 (define (get-skill sym)
-  (hash-ref hash-skills sym (lambda () #f)))
+  (define sym2 sym)
+  (cond [(string? sym2) (set! sym2 (string->symbol sym2))])
+  (hash-ref hash-skills sym2 (lambda () #f)))
 (define (get-skill-mod sym)
-  (define sk (get-skill sym))
+  (define sym2 sym)
+  (cond [(string? sym2) (set! sym2 (string->symbol sym2))])
+  (define sk (get-skill sym2))
   (if sk
       (if (cdr sk)
           (+ (hash-ref hash-base 'character-proficiency-bonus) (get-stat-mod (car sk)))
@@ -141,8 +147,8 @@
   )
 
 (define hash-abilities (make-hash))
-(define (add-ability-to-hash ability num)
-  (hash-set! hash-abilities ability num))
+(define (add-ability-to-hash ability num note)
+  (hash-set! hash-abilities ability (cons num note)))
 
 (define hash-proficiencies-list (make-hash))
 

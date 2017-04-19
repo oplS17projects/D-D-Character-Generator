@@ -7,14 +7,8 @@ add-profiencies, simple-weapons
 add-profiencies, maritial weapons
 set-saving-throw, strength
 set-saving-throw, constitution
-add-skill-choice, Animal Handling
-add-skill-choice, Athletics
-add-skill-choice, intimidaiton
-add-skill-choice, Nature
-add-skill-choice, Perception
-add-skill-choice, Survival
-inc-skill-choice, 2
-add-ability, Rage, 2
+skill-choices, 2, Animal Handling, Athletics, intimidation, Nature, Perception, Survival
+add-ability, Rage, 2, uses
 set-ac, add:+ 10 dexterity-mod constitution-mod
 roll-gold, 2d4, 10
 choose, add-weapon greataxe 1, add-weapon any*-martial-weapon 1
