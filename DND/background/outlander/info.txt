@@ -1,1 +1,6 @@
-Insert outlander info here
+You grew up in the wild, away from any tonw or cities. You may be refered to as a nomad, an explorer, a hunter-gatherer etc.
+You are proficient in athletics, survival and any type of instrument.
+
+You have a staff, a hunting trap, a set of traveler's clothes and 10 gold.
+
+Feature: Wanderer; You have a great memory for maps, geography, terrain, settlements and anything around you.
