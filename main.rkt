@@ -3,7 +3,7 @@
 (include "charsheet.rkt")
 
 ; pictures from https://dnd.wizards.com/dungeons-and-dragons/ and D&D Player's handbook 5e
-(define logo (read-bitmap "./DND/ddlogo3.png"))
+(define logo (read-bitmap "./DND/ddlogo.png"))
 (define human (read-bitmap "./DND/Human.png"))
 (define elf (read-bitmap "./DND/Elf.png"))
 (define dwarf (read-bitmap "./DND/Dwarf.png"))
