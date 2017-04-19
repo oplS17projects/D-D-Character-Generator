@@ -86,7 +86,7 @@ function name, other function name (arguments if any) : Description
 		* Adds 2d4 * 10 gold to the inventory
 
 
-###Note Functions
+###Note, Proficiencies, Skills Functions
 * add-profiencies (string): adds the argument to the list of proficiencies
 	* Ex: add-profiencies, light-armor
 		* Notes that the character is proficient in light armor
