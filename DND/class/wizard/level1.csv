@@ -1,0 +1,18 @@
+1st-level-hp, add:+ 6 constitution-mod
+set-hit-dice, 1d6
+add-profiencies, daggers
+add-profiencies, darts
+add-profiencies, slings
+add-profiencies, quarterstaffs
+add-profiencies, light crossbows
+set-saving-throw, intelligence
+set-saving-throw, wisdom
+skill-choice, 2, arcana, history, insight, investigation, medicine, religion
+choose, add-weapon quarterstaff 1, add-weapon dagger 1
+choose, add-item component-pouch 1, add-item arcane-focus 1
+choose, add-item scholars-pack 1, add-item explorers-pack 1
+add-item spellbook 1
+add-ability, spellbook, 6, spells in book
+add-ability, Cantrips, 3, known
+add-ability, Spells, add:+ intelligence-mod level, known
+add-ability, 1st level spells, 2, uses
