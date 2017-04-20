@@ -1,0 +1,14 @@
+inc-stat, constitution, 2
+inc-stat, strength, 2
+add-profiencies, battleaxe
+add-profiencies, handaxe
+add-profiencies, light hammer
+add-profiencies, warhammer
+add-profiencies, light armor
+add-profiencies, medium armor
+add-language, common
+add-language, dwarvish
+choose, add-profiencies smith's tools, add-profiencies brewer's supplies, add-profiencies mason's tools
+add-note, Darkvision
+add-note, Dwarven Resilience: Advantage on poison saving throws and resistance to poison damage
+add-note, Stonecunning

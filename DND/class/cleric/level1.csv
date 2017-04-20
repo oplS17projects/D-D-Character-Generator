@@ -1,0 +1,18 @@
+1st-lvl-hp, add:+ 8 constitution-mod
+set-hit-dice, 1d8
+add-profiencies, Light Armor
+add-profiencies, Medium Armor
+add-profiencies, Shields
+add-profiencies, Simple Weapons
+set-saving-throw, wisdom
+set-saving-throw, charisma
+skill-choices, 2, history, insight, medicine, persuasion, religion
+choose, add-weapon mace 1, add-weapon warhammer 1
+choose, add-item scale-mail 1, add-item leather-armor 1, add-item chain-mail 1
+choose, add-item light-crossbow-with-bolts 20, add-item any*-simple-weapon 1
+choose, add-item priests-pack 1, add-item explorers-pack 1
+add-item, shield, 1
+add-item, holy symbol, 1
+add-ability, Cantrips, 3, known
+add-ability, Spells, add:+ wisdom-mod level, known
+add-ability, 1st level spells, 2, uses

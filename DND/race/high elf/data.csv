@@ -1,0 +1,13 @@
+inc-stat, dexterity, 2
+inc-stat, intelligence, 1
+add-skill, proficient
+add-profiencies, longswords
+add-profiencies, shortswords
+add-profiencies, shortbow
+add-profiencies, longbow
+add-ability, Wizard Cantrip, 1, known
+add-language, common
+add-language, elvish
+add-language, any*
+add-note, Fey Ancestry: Advantage on saving throws against being charmed; Magic can't put you to sleep
+add-note, Trance: Elves don't sleep and instead meditate for 4 hours a day
