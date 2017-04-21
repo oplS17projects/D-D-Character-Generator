@@ -101,6 +101,7 @@
     [style '(control-border)]
     [paint-callback
      (λ (canvas dc)
+       (send dc set-scale (/ (send logo-panel get-width) 800) (/ (send logo-panel get-height) 103))
        (send dc set-background "black")
        (send dc clear)
      (send dc draw-bitmap logo 0 0))])
