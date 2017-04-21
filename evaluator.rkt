@@ -75,7 +75,7 @@
       [(set-proficiency-bonus? exp) (set-proficiency-bonus exp)]
       [(inc-health? exp) (inc-health exp)]
       [(skill-choice? exp) (skill-choice exp)]
-      [(inc-stat? exp) (inc-stat exp)]
+      [(inc-stat? exp) (inc-stat-eval exp)]
       [(add-language? exp) (add-language exp)]
       [(add-language-choice? exp) (add-language-choice exp)]
       [(add-language-count? exp) (add-language-count exp)]
@@ -336,7 +336,7 @@
 (define (inc-stat? exp)
   (if-exp-match? exp "inc-stat"))
 
-(define (inc-stat exp)
+(define (inc-stat-eval exp)
   (add-stat (cadr exp) (caddr exp)))
 
 (define (add-language? exp)
