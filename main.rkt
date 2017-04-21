@@ -1,42 +1,33 @@
 #lang racket
+
 (require racket/gui rsound "HashTableDefinitions.rkt")
 (include "charsheet.rkt")
 
 ; pictures from https://dnd.wizards.com/dungeons-and-dragons/ and D&D Player's handbook 5e
 (define logo (read-bitmap "./DND/ddlogo.png"))
-(define human (read-bitmap "./DND/Human.png"))
-(define elf (read-bitmap "./DND/Elf.png"))
-(define dwarf (read-bitmap "./DND/Dwarf.png"))
-(define barbarian (read-bitmap "./DND/Barbarian.png"))
+
+; sets picture shown on race and class selection screens when an option is selected
+(define pic 'empty)
+(define (set-pic choice)
+  (set! pic (read-bitmap (string-append (path->string (cdr choice)) "/pic.png"))))
 
 ; Johnny Douglas' Dungeons & Dragons cartoon theme
 ; converted from youtube video
 ; https://www.youtube.com/watch?v=v2u7-M7Ouok&t=37s
 (define main-theme (rs-read "./DND/DDTheme.wav"))
 
-; "Caramel" by Suzanne Vega from the album "Nine Objects of Desire"
-(define human-theme (rs-read "./DND/Caramel.wav"))
+; Human theme is "Caramel" by Suzanne Vega from the album "Nine Objects of Desire"
+; High elf theme is "Lothlorien" by Enya from the album "Shepherd Moons"
+; Mountain Dwarf theme is "Hall of the Mountain King" by Savatage from the album "Hall of the Mountain King"
 
-; "Lothlorien" by Enya from the album "Shepherd Moons"
-(define elf-theme (rs-read "./DND/Lothlorien.wav"))
-
-; "Hall of the Mountain King" by Savatage from the album "Hall of the Mountain King"
-(define dwarf-theme (rs-read "./DND/Hall-Of-The-Mountain-King.wav"))
 (define current-theme main-theme)
 
 ; plays background theme if different from theme currently playing
-(define (play-theme song)
-  (unless (equal? song current-theme) (begin (stop) (set! current-theme song) (play current-theme))))
+(define (play-theme choice)
+  (let ((song (rs-read (string-append (path->string (cdr choice)) "/song.wav"))))
+        (unless (equal? song current-theme) (begin (stop) (set! current-theme song) (play current-theme)))))
 
-(play main-theme)
-
-; defines picture of race
-(define racepic human)
-;sets picture of race
-(define (set-race-pic x) (set! racepic x))
-
-;defines picture of class
-(define classpic barbarian)
+(play current-theme)
 
 ; adjust points to allocate to stats
 (define points-to-allocate 0)
@@ -51,16 +42,16 @@
 (define (dec-stat-points x)
   (unless (<= (get-stat-num x) 0) (begin (dec-stat x) (inc-points) (send points-tally on-paint))))
 
-
 ;sets 1st level hp
 (define (set-init-hp)
   (cond ((equal? (hash-ref hash-base 'character-class) "barbarian")
-         (set-hash-base "hp" (+ (roll 1 12) (getmod "constitution"))))))
+         (set-hash-base "hp" (+ 12 (getmod "constitution"))))))
+
 
 ; update hp based on change to constitution modifier
 (define (update-hp op)
   (let* ((old-con-mod (getmod "constitution")) (new-con-mod (calc-mod "constitution" op 1))
-                                               (diff (- new-con-mod old-con-mod)) (base-hp (- (get-hp) old-con-mod))
+                                               (diff (- new-con-mod old-con-mod)) (base-hp (- (getHP) old-con-mod))
                                                (new-base-hp (+ base-hp new-con-mod)))
     (cond ((not (equal? diff 0)) (unless (or (<= new-base-hp 0) (<= points-to-allocate 0)) (set-hash-base "hp" new-base-hp))
           ))))
@@ -70,30 +61,22 @@
   (floor (/ (- (op (car (getstat str)) num) 10) 2))
   )
 
-; gets current hp
-(define (get-hp)
-  (get-hash-base "hp"))
-
-; updates stats
+; updates stats, just hp at the moment
 (define (update-stats)
-  (set-hash-base "hp" (+ (get-hp) (getmod "constitution"))))
-
-; variable to show main screen
-(define mainOn #t)
+  (set-hash-base "hp" (+ (getHP) (getmod "constitution"))))
 
 ; sets race in stats hash table based on radiobox choice
 (define (set-race x)
-  (cond ((eqv? x 0) (begin (set-race-pic human) (set-hash-base "race" "human") (play-theme human-theme)))
-        ((eqv? x 1) (begin (set-race-pic elf) (set-hash-base "race" "elf") (play-theme elf-theme)))
-        ((eqv? x 2) (begin (set-race-pic dwarf) (set-hash-base "race" "dwarf") (play-theme dwarf-theme)))))
+  (let ((choice (list-ref (get-race-list) x)))
+        (begin (set-pic choice) (set-race-init choice) (play-theme choice))))
 
 ; sets class
 (define (set-class x)
-  (cond ((eqv? x 0) (set-hash-base "class" "barbarian"))
-        ((eqv? x 1) (set-hash-base "class" "cleric"))
-        ((eqv? x 2) (set-hash-base "class" "mage")))
-  (set-init-hp))
+  (let ((choice (list-ref (get-class-list) x)))
+    (begin (set-pic choice) (set-class-init choice))))
 
+; variable to show main screen
+(define mainOn #t)
 
 ; main window
 (define main (new frame% [label "D & D Character Generator"]
@@ -172,22 +155,21 @@
 ; choices for race tab
 (define race-box (new radio-box%
                      [label "Race"]
-                     [choices (list "Human" "Elf" "Dwarf")]
+                     [choices (map car (get-race-list))]
                      [parent l-panel]
                      [vert-margin 10]
                      [horiz-margin 5]
                      [style (list 'vertical 'vertical-label)]
                      [font (make-object font% 20 'roman)]
                      [callback (λ (b e)
-                               (begin (set-race (send race-box get-selection)) (generatestats)
+                               (begin (set-race (send race-box get-selection))
                                  (new canvas%
                                       [parent r-panel]
                                       [min-height 630]
                                       [min-width 650]
                                       [paint-callback
                                       (λ (c dc)
-                                        (send dc draw-bitmap racepic 0 0)
-                                        
+                                        (send dc draw-bitmap pic 0 0)
                                        )])
                                  ))]))
                           
@@ -201,24 +183,21 @@
 ; choices for class tab
 (define class-box (new radio-box%
                      [label "Class"]
-                     [choices (list "Barbarian" "Cleric" "Mage")]
+                     [choices (map car (get-class-list))]
                      [parent l-c-panel]
                      [style (list 'vertical 'vertical-label)]
                      [font (make-object font% 20 'roman)]
                      [selection 0]
                      [callback (λ (b e)
-                               (begin (set-class (send class-box get-selection)) (generatestats) (set-init-hp))
+                               (begin (set-class (send class-box get-selection)))
                                  (new canvas%
                                       [parent r-c-panel]
                                       [min-height 630]
                                       [min-width 650]
                                       [paint-callback
-                                      (λ (c dc)
-                                        (send dc draw-bitmap classpic 0 0)
-                                        
-                                       )])
-                                 )]
-                     ))
+                                       (λ (c dc)
+                                         (send dc draw-bitmap pic 0 0)   
+                                         )]))]))
 
 ; tab panel to adjust base stats
 (define l-stats (new vertical-panel% [parent stats-panel]
@@ -355,7 +334,7 @@
                                             (send dc clear)
                                             (send dc set-text-foreground "blue")
                                             (send dc set-scale 4 4)
-                                            (send dc draw-text (number->string (get-hp)) 2 0))]))
+                                            (send dc draw-text (number->string (getHP)) 2 0))]))
 (define hp-r-buffer (new panel% [parent hp-pan]
                              [min-width 15]))
 (define blank-hp-panel (new panel% [parent r-stats]
