@@ -75,6 +75,12 @@
       [(set-proficiency-bonus? exp) (set-proficiency-bonus exp)]
       [(inc-health? exp) (inc-health exp)]
       [(skill-choice? exp) (skill-choice exp)]
+      [(inc-stat? exp) (inc-stat exp)]
+      [(add-language? exp) (add-language exp)]
+      [(add-language-choice? exp) (add-language-choice exp)]
+      [(add-language-count? exp) (add-language-count exp)]
+      [(set-speed? exp) (set-speed exp)]
+      [(and (list? exp) (eq? 1 (length exp))) (evaluator (car exp))]
       [else (begin
               (display "Failed on: " )
               (display exp)
@@ -155,7 +161,7 @@
   )
 
 (define (isSetHp? exp)
-  (or (if-exp-match? exp "setHP") (if-exp-match? exp "1st-lvl-hp") (if-exp-match? exp "set-HP")))
+  (or (if-exp-match? exp "setHP") (if-exp-match? exp "1st-level-hp") (if-exp-match? exp "1st-lvl-hp") (if-exp-match? exp "set-HP")))
 
 (define (setHP exp) ; Would change stat in hash table to the following value value
   (define hp (evaluator (just-string-to-csv (car (cdr exp)))))
@@ -292,6 +298,7 @@
     [(string->number exp) (string->number exp)]
     [(string=? "getHP" exp) (getHP)]
     [(string=? "hit-dice" exp) (diceroll (hash-ref hash-base 'character-hit-dice))]
+    [(string=? "level" exp) (hash-ref hash-base 'character-level)]
     [else exp]
     ))
 
@@ -307,7 +314,7 @@
 (define (add-ability exp)
   (add-ability-to-hash
              (cadr exp)
-             (string->number (remove-beginning-white-space (car (cddr exp))))
+             (evaluator (just-string-to-csv (remove-beginning-white-space (car (cddr exp)))))
              (remove-beginning-white-space (car (cdddr exp)))))
 
 (define (set-ac? exp)
@@ -325,6 +332,40 @@
 (define (set-proficiency-bonus exp)
   (hash-set! hash-base 'character-proficiency-bonus (string->number (remove-white-space (car (cdr exp)))))
   "Set Proficiency Ok\n")
+
+(define (inc-stat? exp)
+  (if-exp-match? exp "inc-stat"))
+
+(define (inc-stat exp)
+  (add-stat (cadr exp) (caddr exp)))
+
+(define (add-language? exp)
+  (if-exp-match? exp "add-language"))
+
+(define (add-language exp)
+  (add-note-to-hash (string-append "Can Read, Write and Speak " (cadr exp) ".\n")))
+
+(define (add-language-choice? exp)
+ (if-exp-match? exp "add-language-choice"))
+
+(define (add-language-choice exp)
+  (cond (string=? (remove-beginning-white-space (cadr exp)) "any")
+      (add-note-to-hash "Can Read, Write and Speak any 1 language of choice")
+      ))
+
+; dummy functions, no purpose yet
+
+(define (add-language-count? exp)
+  (if-exp-match? exp "add-language-count"))
+
+(define (add-language-count exp)
+  'k)
+
+(define (set-speed? exp)
+  (if-exp-match? exp "set-speed"))
+
+(define (set-speed exp)
+  'k)
 
 ; Diceroll?
 (define (diceroll? dr)
