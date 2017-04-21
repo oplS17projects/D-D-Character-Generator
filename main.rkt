@@ -17,7 +17,7 @@
 (define main-theme (rs-read "./DND/DDTheme.wav"))
 
 ; Human theme is "Caramel" by Suzanne Vega from the album "Nine Objects of Desire"
-; High elf theme is "Lothlorien" by Enya from the album "Shepherd Moons"
+; High Elf theme is "Lothlorien" by Enya from the album "Shepherd Moons"
 ; Mountain Dwarf theme is "Hall of the Mountain King" by Savatage from the album "Hall of the Mountain King"
 
 (define current-theme main-theme)
@@ -38,14 +38,14 @@
 
 ; updates points to allocate in points tab panel
 (define (inc-stat-points x)
-  (unless (<= points-to-allocate 0) (begin (inc-stat x) (dec-points) (send points-tally on-paint))))
+  (unless (<= points-to-allocate 0) (begin (inc-stat x) (dec-points) (re-eval) (send points-tally on-paint))))
 (define (dec-stat-points x)
-  (unless (<= (get-stat-num x) 0) (begin (dec-stat x) (inc-points) (send points-tally on-paint))))
+  (unless (<= (get-stat-num x) 0) (begin (dec-stat x) (inc-points) (re-eval) (send points-tally on-paint))))
 
 ;sets 1st level hp
-(define (set-init-hp)
+#|(define (set-init-hp)
   (cond ((equal? (hash-ref hash-base 'character-class) "barbarian")
-         (set-hash-base "hp" (+ 12 (getmod "constitution"))))))
+         (set-hash-base "hp" (+ 12 (getmod "constitution"))))))|#
 
 
 ; update hp based on change to constitution modifier
@@ -80,18 +80,20 @@
 
 ; main window
 (define main (new frame% [label "D & D Character Generator"]
-                  [width 800]
+                  [width 820]
                   [height 768]
                   ))
 
+(define main2 (new vertical-panel% [parent main]
+                   [style '(auto-vscroll)]))
 ; panel for logo
-(define logo-panel (new horizontal-panel% [parent main]
+(define logo-panel (new horizontal-panel% [parent main2]
                        [min-height 103]))
 
 ; panels for attributes and character generation
-(define choice-panel (new horizontal-panel% [parent main]
+(define choice-panel (new horizontal-panel% [parent main2]
                          [min-height 600]))
-(define gen-panel (new horizontal-panel% [parent main]
+(define gen-panel (new horizontal-panel% [parent main2]
                       [alignment '(center center)]))
 
 ;draws logo
@@ -444,7 +446,6 @@
                     [parent gen-panel]
                     [callback (λ (b e)
                                 (begin (generatestats)
-                                       (set-init-hp)
                                        (set! points-to-allocate 0)
                                        (send str-canvas on-paint)
                                        (send dex-canvas on-paint)

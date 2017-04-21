@@ -57,7 +57,7 @@
                            ((equal? key 'dception) (send dc draw-text (number->string (get-skill-mod key)) 150 491))
                            ((equal? key 'history) (send dc draw-text (number->string (get-skill-mod key)) 150 509))
                            ((equal? key 'insight) (send dc draw-text (number->string (get-skill-mod key)) 150 527))
-                           ((equal? key 'intimidaiton) (send dc draw-text (number->string (get-skill-mod key)) 150 545))
+                           ((equal? key 'intimidation) (send dc draw-text (number->string (get-skill-mod key)) 150 545))
                            ((equal? key 'investigation) (send dc draw-text (number->string (get-skill-mod key)) 150 563))
                            ((equal? key 'medicine) (send dc draw-text (number->string (get-skill-mod key)) 150 581))
                            ((equal? key 'nature) (send dc draw-text (number->string (get-skill-mod key)) 150 599))
