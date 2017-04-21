@@ -73,7 +73,7 @@
 ; sets class
 (define (set-class x)
   (let ((choice (list-ref (get-class-list) x)))
-    (begin (set-pic choice) (set-class-init choice))))
+    (begin (set-pic choice) (set-class-init choice)  (generatestats))))
 
 ; variable to show main screen
 (define mainOn #t)
