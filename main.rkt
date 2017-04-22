@@ -3,7 +3,10 @@
 (require racket/gui rsound "HashTableDefinitions.rkt")
 (include "charsheet.rkt")
 
-; pictures and race and class descriptions from https://dnd.wizards.com/dungeons-and-dragons/ and D&D Player's Handbook 5e
+; pictures and races and race descriptions from https://dnd.wizards.com/dungeons-and-dragons/ and D&D Player's Handbook 5e
+; picture of cleric from http://forgottenrealms.wikia.com/wiki/Cleric and description from D&D Player's Handbook 5e
+; picture of wizard from http://forgottenrealms.wikia.com/wiki/Wizard and description from D&D Player's handbook 5e
+; picture of barbarian from http://www.sidharthchaturvedi.com/2014/08/d-next-barbarian.html and description from D&D Player's Handbook 5e
 (define logo (read-bitmap "./DND/ddlogo.png"))
 (define logo-w (send logo get-width))
 (define logo-h (send logo get-height))
@@ -43,16 +46,17 @@
 
 ; updates points to allocate in points tab panel
 (define (inc-stat-points x)
-  (unless (<= points-to-allocate 0) (begin (inc-stat x) (dec-points) (re-eval) (send points-tally on-paint))))
+  (unless (<= points-to-allocate 0) (begin (inc-stat x) (dec-points)  (send points-tally on-paint))))
 (define (dec-stat-points x)
-  (unless (<= (get-stat-num x) 0) (begin (dec-stat x) (inc-points) (re-eval) (send points-tally on-paint))))
+  (unless (<= (get-stat-num x) 0) (begin (dec-stat x) (inc-points)  (send points-tally on-paint))))
 
 ; update hp based on change to constitution modifier
+(define base-hp 0)
 (define (update-hp op)
   (let* ((old-con-mod (getmod "constitution")) (new-con-mod (calc-mod "constitution" op 1))
-                                               (diff (- new-con-mod old-con-mod)) (base-hp (- (getHP) old-con-mod))
+                                               (diff (- new-con-mod old-con-mod))
                                                (new-base-hp (+ base-hp new-con-mod)))
-    (cond ((not (equal? diff 0)) (unless (or (<= new-base-hp 0) (<= points-to-allocate 0)) (set-hash-base "hp" new-base-hp))
+    (cond ((not (equal? diff 0)) (unless (or (<= new-base-hp 0) (< points-to-allocate 0) (<= (get-stat-num "constitution") 0)) (set-hash-base "hp" new-base-hp))
           ))))
 
 ; calculates ability modifier based on changes in the modifier
@@ -61,14 +65,16 @@
   )
 
 ; sets race in stats hash table based on radiobox choice
+(define race 'nil)
 (define (set-race x)
   (let ((choice (list-ref (get-race-list) x)))
-        (begin (set-pic choice) (set-race-init choice) (play-theme choice))))
+        (begin (set-pic choice) (set! race choice) (set-race-init choice) (play-theme choice))))
 
-; sets class
+; sets class and class stats
+(define class 'nil)
 (define (set-class x)
   (let ((choice (list-ref (get-class-list) x)))
-    (begin (set-pic choice) (set-class-init choice)  (generatestats) (re-eval))))
+    (begin (set-pic choice) (generatestats) (set! class choice) (set-class-init choice) (set! base-hp (- (getHP) (getmod "constitution"))))))
 
 ; makes a roman font of a certain size
 (define (my-roman-font size)
@@ -115,7 +121,7 @@
                  [callback (λ (b e)
                              (case (send b get-selection)
                                ((0) (send b change-children (λ (children) (list name-panel))))
-                               ((1) (send b change-children (λ (children) (list race-panel))))
+                               ((1) (begin (send b change-children (λ (children) (list race-panel)))))
                                ((2) (send b change-children (λ (children) (list class-panel))))
                                ((3) (send b change-children (λ (children) (list stats-panel))))
                                ))]))
@@ -454,7 +460,7 @@
                     [parent gen-panel]
                     [callback (λ (b e)
                                 (begin (generatestats)
-                                       (re-eval)
+                                       (set-class-init class)
                                        (set! points-to-allocate 0)
                                        (send str-canvas on-paint)
                                        (send dex-canvas on-paint)
@@ -470,7 +476,7 @@
                       [label "Generate Character Sheet"]
                       [parent gen-panel]
                       [callback (λ  (b e)
-                                  (begin (re-eval) (genCS #t)))]))
+                                  (genCS #t))]))
 
 ; closes character sheet button
 (define closeSheet (new button%

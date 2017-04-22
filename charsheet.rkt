@@ -11,7 +11,6 @@
                   [width pic-w]
                   [height pic-h]))
 
-
   
 ; canvas on which to draw data
 (define cansheet
@@ -110,7 +109,7 @@
                              ((equal? key 'survival) (send dc draw-text val-num skills_x survival_y))
                              )))))
 
-                
+                ; prints out list that contains elements of cons items
                 (define (print-list lst x y delta)
                              (unless (equal? lst '())
                                (let ((item (cadar lst)) (quantity (cddar lst)))
@@ -130,7 +129,27 @@
                 ; prints inventory of equipment
                (unless (hash-empty? hash-inventory)
                  (let ((inventory-list (hash->list hash-inventory)))
-                     (print-list inventory-list 550 503 15)))
+                     (print-list inventory-list 355 780 15)))
+
+                ; prints proficiencies
+                (unless (hash-empty? hash-proficiencies-list)
+                  (define proficiencies (hash->list hash-proficiencies-list))
+                  (define (print-proficiencies lst x-coord y-coord delta)
+                    (unless (equal? lst '())
+                      (let ((prof (cadar lst)))
+                        (begin (send dc draw-text prof x-coord y-coord)
+                               (print-proficiencies (cdr lst) x-coord (add-delta y-coord delta) delta)))))
+                  (print-proficiencies proficiencies 45 823 15))
+
+                ; prints notes and miscellaneous info
+                (unless (hash-empty? hash-notes)
+                  (define notes (hash->list hash-notes))
+                  (define (print-notes lst x-coord y-coord delta)
+                    (unless (equal? lst '())
+                      (let ((prof (cdar lst)))
+                        (begin (send dc draw-text prof x-coord y-coord)
+                               (print-notes (cdr lst) x-coord (add-delta y-coord delta) delta)))))
+                  (print-notes notes 545 503 15))
 
                 )]))
                 
