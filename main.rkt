@@ -15,7 +15,7 @@
 (define choice-panel-h 630)
 
 ; sets picture shown on race and class selection screens when an option is selected
-(define pic 'nil)
+(define pic (read-bitmap "./DND/race/Mountain Dwarf/pic.png"))
 (define (set-pic choice)
   (set! pic (read-bitmap (string-append (path->string (cdr choice)) "/pic.png"))))
 
@@ -56,8 +56,8 @@
   (let* ((old-con-mod (getmod "constitution")) (new-con-mod (calc-mod "constitution" op 1))
                                                (diff (- new-con-mod old-con-mod))
                                                (new-base-hp (+ base-hp new-con-mod)))
-    (cond ((not (equal? diff 0)) (unless (or (<= new-base-hp 0) (< points-to-allocate 0) (<= (get-stat-num "constitution") 0)) (set-hash-base "hp" new-base-hp))
-          ))))
+    (unless (or (eqv? diff 0) (<= new-base-hp 0) (<= points-to-allocate 0) (<= (get-stat-num "constitution") 0)) (set-hash-base "hp" new-base-hp)
+                                )))
 
 ; calculates ability modifier based on changes in the modifier
 (define (calc-mod str op num)
@@ -68,13 +68,55 @@
 (define race 'nil)
 (define (set-race x)
   (let ((choice (list-ref (get-race-list) x)))
-        (begin (set-pic choice) (set! race choice) (set-race-init choice) (play-theme choice))))
+        (begin (set-pic choice) (set! race choice) (re-init-stats) (generatestats)
+               (set-race-init choice)
+               (unless (equal? class 'nil) (set-class-init class)) (play-theme choice))))
 
 ; sets class and class stats
 (define class 'nil)
 (define (set-class x)
   (let ((choice (list-ref (get-class-list) x)))
-    (begin (set-pic choice) (generatestats) (set! class choice) (set-class-init choice) (set! base-hp (- (getHP) (getmod "constitution"))))))
+    (begin (set-pic choice) (re-init-stats) (generatestats) (set! class choice)
+           (unless (equal? race 'nil) (set-race-init race)) (set-class-init choice)
+             (set! base-hp (- (getHP) (getmod "constitution"))))))
+
+(define (re-init-stats)
+  (begin (hash-clear! hash-inventory)
+         (hash-clear! hash-choice-lists)
+         (hash-clear! hash-notes)
+         (hash-clear! hash-abilities)
+         (hash-clear! hash-weapons)
+         (hash-clear! hash-stats)
+         (hash-clear! hash-skills)
+         (hash-clear! hash-proficiencies-list)
+         (hash-stats-init 'stat-strength)
+         (hash-stats-init 'stat-dexterity)
+         (hash-stats-init 'stat-constitution)
+         (hash-stats-init 'stat-wisdom)
+         (hash-stats-init 'stat-intelligence)
+         (hash-stats-init 'stat-charisma)
+         (for-each (λ (x) (set-hash-base x ""))
+              (list "class" "race" "background" "hp" "hit-dice" "armor-class" "armor-class-eval" "level"))
+         (hash-set! hash-base 'character-proficiency-bonus 0)
+         (hash-skills-init 'acrobatics 'dexterity #f)
+         (hash-skills-init '|animal handling| 'wisdom #f)
+         (hash-skills-init 'arcana 'intelligence #f)
+         (hash-skills-init 'athletics 'strength #f)
+         (hash-skills-init 'dception 'charisma #f)
+         (hash-skills-init 'history 'intelligence #f)
+         (hash-skills-init 'insight 'wisdom #f)
+         (hash-skills-init 'intimidation 'charisma #f)
+         (hash-skills-init 'investigation 'intelligence #f)
+         (hash-skills-init 'medicine 'wisdom #f)
+         (hash-skills-init 'nature 'intelligence #f)
+         (hash-skills-init 'perception 'wisdom #f)
+         (hash-skills-init 'performance 'charisma #f)
+         (hash-skills-init 'persuasion 'charisma #f)
+         (hash-skills-init 'religion 'intelligence #f)
+         (hash-skills-init '|slight of hand| 'dexterity #f)
+         (hash-skills-init 'stealth 'dexterity #f)
+         (hash-skills-init 'survival 'wisdom #f)
+         ))
 
 ; makes a roman font of a certain size
 (define (my-roman-font size)
@@ -121,8 +163,10 @@
                  [callback (λ (b e)
                              (case (send b get-selection)
                                ((0) (send b change-children (λ (children) (list name-panel))))
-                               ((1) (begin (send b change-children (λ (children) (list race-panel)))))
-                               ((2) (send b change-children (λ (children) (list class-panel))))
+                               ((1) (begin (send b change-children (λ (children) (list race-panel)))
+                                           (unless (equal? race 'nil) (begin (set-pic race) (send r-can on-paint)))))
+                               ((2) (begin (send b change-children (λ (children) (list class-panel)))
+                                           (unless (equal? class 'nil) (begin (set-pic class) (send c-can on-paint)))))
                                ((3) (send b change-children (λ (children) (list stats-panel))))
                                ))]))
 
@@ -159,7 +203,15 @@
 (define r-panel (new panel% [parent splitrace]
                      [style '(border)]))
 
-
+(define r-can (new canvas%
+                         [parent r-panel]
+                         [min-height 630]
+                          [min-width 650]
+                                      [paint-callback
+                                      (λ (c dc)
+                                        (send dc clear)
+                                        (send dc draw-bitmap pic 0 0)
+                                       )]))
 ; choices for race tab
 (define race-box (new radio-box%
                      [label "Race"]
@@ -171,14 +223,7 @@
                      [font (my-roman-font 20)]
                      [callback (λ (b e)
                                (begin (set-race (send race-box get-selection))
-                                 (new canvas%
-                                      [parent r-panel]
-                                      [min-height 630]
-                                      [min-width 650]
-                                      [paint-callback
-                                      (λ (c dc)
-                                        (send dc draw-bitmap pic 0 0)
-                                       )])
+                                 (send r-can on-paint)
                                  ))]))
                           
 ; class panel setup
@@ -187,7 +232,15 @@
                        [style '(border)]))
 (define r-c-panel (new panel% [parent splitclass]
                        [style '(border)]))
-
+(define c-can (new canvas%
+                         [parent r-c-panel]
+                         [min-height 630]
+                          [min-width 650]
+                                      [paint-callback
+                                      (λ (c dc)
+                                        (send dc clear)
+                                        (send dc draw-bitmap pic 0 0)
+                                       )]))
 ; choices for class tab
 (define class-box (new radio-box%
                      [label "Class"]
@@ -198,14 +251,7 @@
                      [selection 0]
                      [callback (λ (b e)
                                (begin (set-class (send class-box get-selection)))
-                                 (new canvas%
-                                      [parent r-c-panel]
-                                      [min-height 650]
-                                      [min-width 650]
-                                      [paint-callback
-                                       (λ (c dc)
-                                         (send dc draw-bitmap pic 0 0)   
-                                         )]))]))
+                                (send c-can on-paint))]))
 
 ; tab panel to adjust base stats
 (define l-stats (new vertical-panel% [parent stats-panel]
@@ -378,7 +424,7 @@
                      [label "-"]
                      [font (my-roman-font 15)]
                      (callback (λ ( b e)
-                                 (begin (dec-stat-points "dexterity") (send dex-canvas on-paint)
+                                 (begin (dec-stat-points "dexterity") (re-eval) (send dex-canvas on-paint)
                                         )))))
 (define dex-message (new message% [parent dex-panel]
                          [label "Dexterity"]
@@ -387,7 +433,7 @@
                      [label "+"]
                      [font (my-roman-font 15)]
                      (callback (λ (b e)
-                                 (begin (inc-stat-points "dexterity") (send dex-canvas on-paint))))))
+                                 (begin (inc-stat-points "dexterity") (re-eval) (send dex-canvas on-paint))))))
 
 ; adjust constitution
 (define dec-con (new button% [parent con-panel]
