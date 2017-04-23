@@ -15,7 +15,7 @@
 (hash-base-init 'character-hit-dice)
 (hash-base-init 'character-armor-class)
 (hash-base-init 'character-armor-class-eval)
-(hash-set! hash-base 'character-level 1)
+(hash-base-init 'character-level)
 
 ; define base stats
 (define hash-stats (make-hash))
@@ -186,7 +186,7 @@
   (cond ((equal? ability "class") (hash-ref hash-base 'character-class))
         ((equal? ability "race") (hash-ref hash-base 'character-race))
         ((equal? ability "background") (hash-ref hash-base 'character-background))
-        ((equal? ability "character-proficieny-bonus") (hash-ref hash-base 'character-proficiency-bonus))
+        ((equal? ability "character-proficiency-bonus") (hash-ref hash-base 'character-proficiency-bonus))
         ((equal? ability "hp") (hash-ref hash-base 'character-hp))
         ((equal? ability "hit-dice") (hash-ref hash-base 'character-hit-dice))
         ((equal? ability "armor-class") (hash-ref hash-base 'character-armor-class))
