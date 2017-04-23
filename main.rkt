@@ -15,7 +15,7 @@
 (define choice-panel-h 630)
 
 ; sets picture shown on race and class selection screens when an option is selected
-(define pic (read-bitmap "./DND/race/Mountain Dwarf/pic.png"))
+(define pic 'nil)
 (define (set-pic choice)
   (set! pic (read-bitmap (string-append (path->string (cdr choice)) "/pic.png"))))
 
@@ -164,9 +164,12 @@
                              (case (send b get-selection)
                                ((0) (send b change-children (λ (children) (list name-panel))))
                                ((1) (begin (send b change-children (λ (children) (list race-panel)))
-                                           (unless (equal? race 'nil) (begin (set-pic race) (send r-can on-paint)))))
+                                           (if (equal? race 'nil) (begin (set-pic (list-ref (get-race-list) 0)))
+                                               (begin (set-pic race) (send r-can on-paint)))))
                                ((2) (begin (send b change-children (λ (children) (list class-panel)))
-                                           (unless (equal? class 'nil) (begin (set-pic class) (send c-can on-paint)))))
+                                           (if (equal? class 'nil) (begin (set-pic (list-ref (get-class-list) 0))
+                                                                          (send c-can on-paint))
+                                               (begin (set-pic class) (send c-can on-paint)))))
                                ((3) (send b change-children (λ (children) (list stats-panel))))
                                ))]))
 

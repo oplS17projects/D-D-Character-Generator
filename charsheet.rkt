@@ -1,6 +1,5 @@
 (require "evaluator.rkt")
 
-
 ; uses picture as background for character sheet
 (define sheetpicture (read-bitmap "./DND/ddcharsheet.png"))
 (define pic-w (send sheetpicture get-width))
@@ -113,12 +112,12 @@
                 (define (print-list lst x y delta)
                              (unless (equal? lst '())
                                (let ((item (cadar lst)) (quantity (cddar lst)))
-                                 (if (equal? "any*" (substring item 0 4))
-                                     (print-list (cdr lst) x y delta)
+                                 ;(if (equal? "any*" (substring item 0 4))
+                                  ;   (print-list (cdr lst) x y delta)
                                      (begin (send dc draw-text
                                                   (if (number? quantity) (string-append (number->string quantity) " " item)
                                                       (string-append quantity " " item)) x y)
-                                            (print-list (cdr lst) x (add-delta y delta) delta))))))
+                                            (print-list (cdr lst) x (add-delta y delta) delta)))))
                 
                 ; prints weapons list
                 (unless (hash-empty? hash-weapons)
@@ -142,17 +141,45 @@
                   (print-proficiencies proficiencies 45 823 15))
 
                 ; prints notes and miscellaneous info
-                (unless (hash-empty? hash-notes)
+                (define line-length 20)
+
+               #| (unless (hash-empty? hash-notes)
                   (define notes (hash->list hash-notes))
                   (define (print-notes lst x-coord y-coord delta)
                     (unless (equal? lst '())
                       (let ((prof (cdar lst)))
                         (begin (send dc draw-text prof x-coord y-coord)
                                (print-notes (cdr lst) x-coord (add-delta y-coord delta) delta)))))
-                  (print-notes notes 545 503 15))
-
-                )]))
+                  (print-notes notes 545 503 15))|#
                 
+                #|(unless (hash-empty? hash-notes)
+                  (let ((notes (map string-split (map cdr (hash->list hash-notes)))) (lz 21) (y-coord 503))
+                        (begin (define (ps lst str x y delta)
+                                 (cond ((equal? lst '()) (send dc draw-text str x y))
+                                       (else (let ((z (string-append str " " (car lst))))
+                                               (if (> (string-length z) lz) (send dc draw-text str x y (ps lst "" x (+ y delta) delta))
+                                                   (ps (cdr lst) z x y delta))))))
+                               (ps (car notes) "" 545 y-coord 15))))|#
+                
+                (unless (hash-empty? hash-notes)
+                  (begin (define notes (map string-split (map cdr (hash->list hash-notes))))
+                         (define lz 27)
+                         (define y-coord 502)
+                         (define (ps lst str x y delta)
+                           (cond ((equal? lst '()) (begin (send dc draw-text str x y) (send dc draw-text "" x (add-delta y delta) (set! y-coord (add-delta y delta)))))
+                                 (else (let ((z (string-append str " " (car lst))))
+                                         (if (> (string-length z) lz) (begin (send dc draw-text str x y) (ps lst "" x (+ y delta) delta))
+                                             (ps (cdr lst) z x y delta))))))
+                         (define (pn lst str x y delta)
+                           (unless (equal? lst '())
+                             (begin (ps (car lst) str x y delta) (pn (cdr lst) str x (+ y-coord delta) delta))))
+                         (pn notes "" 545 y-coord 15)))
+
+               
+               
+                )]))
+
+ 
 
 ; boolean parameter determines whether to draw character sheet or not
 (define (genCS showsheet)
