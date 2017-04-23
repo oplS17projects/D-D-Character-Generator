@@ -182,10 +182,7 @@
                                (print-proficiencies (cdr lst) x-coord (add-delta y-coord delta) delta)))))
                   (print-proficiencies proficiencies 45 823 15))
 
-                ; prints notes and miscellaneous info
-                (define line-length 20)
-
-               
+                
                ; prints  notes 
                 (unless (hash-empty? hash-notes)
                   (begin (define notes (map string-split (map cdr (hash->list hash-notes))))
