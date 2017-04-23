@@ -16,3 +16,4 @@ add-item, holy symbol, 1
 add-ability, Cantrips, 3, known
 add-ability, Spells, add:+ wisdom-mod level, known
 add-ability, 1st level spells, 2, uses
+set-ac, add:+ 10 dexterity-mod

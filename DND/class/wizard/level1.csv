@@ -16,3 +16,4 @@ add-ability, spellbook, 6, spells in book
 add-ability, Cantrips, 3, known
 add-ability, Spells, add:+ intelligence-mod level, known
 add-ability, 1st level spells, 2, uses
+set-ac, add:+ 10 dexterity-mod
