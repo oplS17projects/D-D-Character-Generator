@@ -143,24 +143,8 @@
                 ; prints notes and miscellaneous info
                 (define line-length 20)
 
-               #| (unless (hash-empty? hash-notes)
-                  (define notes (hash->list hash-notes))
-                  (define (print-notes lst x-coord y-coord delta)
-                    (unless (equal? lst '())
-                      (let ((prof (cdar lst)))
-                        (begin (send dc draw-text prof x-coord y-coord)
-                               (print-notes (cdr lst) x-coord (add-delta y-coord delta) delta)))))
-                  (print-notes notes 545 503 15))|#
-                
-                #|(unless (hash-empty? hash-notes)
-                  (let ((notes (map string-split (map cdr (hash->list hash-notes)))) (lz 21) (y-coord 503))
-                        (begin (define (ps lst str x y delta)
-                                 (cond ((equal? lst '()) (send dc draw-text str x y))
-                                       (else (let ((z (string-append str " " (car lst))))
-                                               (if (> (string-length z) lz) (send dc draw-text str x y (ps lst "" x (+ y delta) delta))
-                                                   (ps (cdr lst) z x y delta))))))
-                               (ps (car notes) "" 545 y-coord 15))))|#
-                
+               
+               ; prints  notes 
                 (unless (hash-empty? hash-notes)
                   (begin (define notes (map string-split (map cdr (hash->list hash-notes))))
                          (define lz 27)
