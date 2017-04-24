@@ -29,11 +29,13 @@
 ; Mountain Dwarf theme is "Hall of the Mountain King" by Savatage from the album "Hall of the Mountain King"
 
 (define current-theme main-theme)
-
+(define play-music-message "Toggle Music")
+(define music-status #t)
 ; plays background theme if different from theme currently playing
 (define (play-theme choice)
   (let ((song (rs-read (string-append (path->string (cdr choice)) "/song.wav"))))
-        (unless (equal? song current-theme) (begin (stop) (set! current-theme song) (play current-theme)))))
+        (unless (equal? song current-theme)
+          (when music-status (begin (stop) (set! current-theme song) (play current-theme))))))
 
 (play current-theme)
 
@@ -69,8 +71,13 @@
 (define (set-race x)
   (let ((choice (list-ref (get-race-list) x)))
         (begin (set-pic choice) (set! race choice) (re-init-stats) (generatestats)
-               (set-race-init choice)
+               (set-race-init choice) (setspeed)
                (unless (equal? class 'nil) (set-class-init class)) (play-theme choice))))
+
+; sets speed of character
+(define (setspeed)
+  (cond ((equal? (car race) "Mountain Dwarf") (set-hash-base "speed" 20))
+        ((or (equal? (car race) "Human") (equal? (car race) "High Elf")) (set-hash-base "speed" 30))))
 
 ; sets class and class stats
 (define class 'nil)
@@ -80,43 +87,7 @@
            (unless (equal? race 'nil) (set-race-init race)) (set-class-init choice)
              (set! base-hp (- (getHP) (getmod "constitution"))))))
 
-(define (re-init-stats)
-  (begin (hash-clear! hash-inventory)
-         (hash-clear! hash-choice-lists)
-         (hash-clear! hash-notes)
-         (hash-clear! hash-abilities)
-         (hash-clear! hash-weapons)
-         (hash-clear! hash-stats)
-         (hash-clear! hash-skills)
-         (hash-clear! hash-proficiencies-list)
-         (hash-stats-init 'stat-strength)
-         (hash-stats-init 'stat-dexterity)
-         (hash-stats-init 'stat-constitution)
-         (hash-stats-init 'stat-wisdom)
-         (hash-stats-init 'stat-intelligence)
-         (hash-stats-init 'stat-charisma)
-         (for-each (λ (x) (set-hash-base x ""))
-              (list "class" "race" "background" "hp" "hit-dice" "armor-class" "armor-class-eval" "level"))
-         (hash-set! hash-base 'character-proficiency-bonus 0)
-         (hash-skills-init 'acrobatics 'dexterity #f)
-         (hash-skills-init '|animal handling| 'wisdom #f)
-         (hash-skills-init 'arcana 'intelligence #f)
-         (hash-skills-init 'athletics 'strength #f)
-         (hash-skills-init 'dception 'charisma #f)
-         (hash-skills-init 'history 'intelligence #f)
-         (hash-skills-init 'insight 'wisdom #f)
-         (hash-skills-init 'intimidation 'charisma #f)
-         (hash-skills-init 'investigation 'intelligence #f)
-         (hash-skills-init 'medicine 'wisdom #f)
-         (hash-skills-init 'nature 'intelligence #f)
-         (hash-skills-init 'perception 'wisdom #f)
-         (hash-skills-init 'performance 'charisma #f)
-         (hash-skills-init 'persuasion 'charisma #f)
-         (hash-skills-init 'religion 'intelligence #f)
-         (hash-skills-init '|slight of hand| 'dexterity #f)
-         (hash-skills-init 'stealth 'dexterity #f)
-         (hash-skills-init 'survival 'wisdom #f)
-         ))
+
 
 ; makes a roman font of a certain size
 (define (my-roman-font size)
@@ -159,6 +130,7 @@
                  [choices (list "Names"
                                 "Race"
                                 "Class"
+                                "Alignment"
                                 "Base Stats")]
                  [callback (λ (b e)
                              (case (send b get-selection)
@@ -170,7 +142,8 @@
                                            (if (equal? class 'nil) (begin (set-pic (list-ref (get-class-list) 0))
                                                                           (send c-can on-paint))
                                                (begin (set-pic class) (send c-can on-paint)))))
-                               ((3) (send b change-children (λ (children) (list stats-panel))))
+                               ((3) (send b change-children (λ (children) (list alignment-panel))))
+                               ((4) (send b change-children (λ (children) (list stats-panel))))
                                ))]))
 
 ; panels for each attribute tab 
@@ -179,6 +152,8 @@
                         [style '(deleted)]))
 (define class-panel (new panel% [parent tab]
                          [style '(deleted)]))
+(define alignment-panel (new panel% [parent tab]
+                             [style '(deleted)]))
 (define stats-panel (new horizontal-panel% [parent tab]
                          [style '(deleted)]))
 
@@ -244,6 +219,23 @@
                                         (send dc clear)
                                         (send dc draw-bitmap pic 0 0)
                                        )]))
+
+; alignment tabs and functions
+(define (get-alignment-list)
+  (list "Lawful Good" "Lawful Neutral" "Lawful Evil"
+                                          "Neutral Good" "Neutral" "Neutral Evil"
+                                          "Chaotic Good" "Chaotic Neutral" "Chaotic Evil"))
+
+(define (set-alignment align)
+  (set-hash-base "alignment" (list-ref (get-alignment-list) align)))
+
+(define alignment-box (new radio-box%
+                           [label "Alignment"]
+                           [choices (get-alignment-list)]
+                           [parent alignment-panel]
+                           [style  '(vertical)]
+                           [callback (λ (b e)
+                                       (set-alignment (send alignment-box get-selection)))]))
 ; choices for class tab
 (define class-box (new radio-box%
                      [label "Class"]
@@ -533,6 +525,14 @@
                         [parent gen-panel]
                         [callback (λ (b e)
                                     (genCS #f))]))
+
+(define play-song-button (new button%
+                              [label play-music-message]
+                              [parent gen-panel]
+                              [callback (λ (b e)
+                                          (if music-status (begin (stop) (set! music-status #f))
+                                              (begin (play main-theme) (set! music-status #t))))]))
+
 ; Exits application button
 (define Exit (new button%
                   [label "Exit"]

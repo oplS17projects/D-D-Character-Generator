@@ -53,32 +53,32 @@
                           (prof-bonus (get-hash-base "character-proficiency-bonus"))
                           (prof (cdr value)))
                       (cond ((equal? key 'stat-strength) (begin (send dc draw-text stats-val statsx statsstr)
-                                                                (if (equal? #t prof)
+                                                                (if prof
                                                                     (begin (send dc draw-text "*" savings_star_x savings_star_str)
                                                                            (send dc draw-text (number->string (+ prof-bonus (getmod "strength"))) savings_x savings_str_y))
                                                                     (send dc draw-text (number->string (getmod "strength")) savings_x savings_str_y))))
                             ((equal? key 'stat-dexterity) (begin (send dc draw-text stats-val statsx statsdex)
-                                                                 (if (equal? #t prof)
+                                                                 (if prof
                                                                      (begin (send dc draw-text "*" savings_star_x savings_star_dex)
                                                                             (send dc draw-text (number->string (+ prof-bonus (getmod "dexterity"))) savings_x savings_dex_y))
                                                                      (send dc draw-text (number->string (getmod "dexterity")) savings_x savings_dex_y))))
                             ((equal? key 'stat-constitution) (begin (send dc draw-text stats-val statsx statscon)
-                                                                    (if (equal? #t prof)
+                                                                    (if prof
                                                                         (begin (send dc draw-text "*" savings_star_x savings_star_con)
                                                                                (send dc draw-text (number->string (+ prof-bonus (getmod "constitution"))) savings_x savings_con_y))
                                                                         (send dc draw-text (number->string (getmod "constitution")) savings_x savings_con_y))))
                             ((equal? key 'stat-intelligence) (begin (send dc draw-text stats-val statsx statsint)
-                                                                    (if (equal? #t prof)
+                                                                    (if prof
                                                                         (begin (send dc draw-text "*" savings_star_x savings_star_int)
                                                                                (send dc draw-text (number->string (+ prof-bonus (getmod "intelligence"))) savings_x savings_int_y))
                                                                     (send dc draw-text (number->string (getmod "intelligence")) savings_x savings_int_y))))
                             ((equal? key 'stat-wisdom) (begin (send dc draw-text stats-val statsx statswis)
-                                                              (if (equal? #t prof)
+                                                              (if prof
                                                                   (begin (send dc draw-text "*" savings_star_x savings_star_wis)
                                                                          (send dc draw-text (number->string (+ prof-bonus (getmod "wisdom"))) savings_x savings_wis_y))
                                                                     (send dc draw-text (number->string (getmod "wisdom")) savings_x savings_wis_y))))
                             ((equal? key 'stat-charisma) (begin (send dc draw-text stats-val statsx statschar)
-                                                                (if (equal? #t prof)
+                                                                (if prof
                                                                     (begin (send dc draw-text "*" savings_star_x savings_star_cha)
                                                                            (send dc draw-text (number->string (+ prof-bonus (getmod "charisma"))) savings_x savings_cha_y))
                                                                     (send dc draw-text (number->string (getmod "charisma")) savings_x savings_cha_y)))))))))
@@ -92,7 +92,11 @@
                                   (player_x 630)
                                   (align_x 500)
                                   (race_x 350)
-                                  (level_x (add-delta class_x 120))) 
+                                  (hp_y 257)
+                                  (level_x (add-delta class_x 120))
+                                  (armor_class_x 325)
+                                  (armor_class_y 200)
+                                  (speed_x (add-delta armor_class_x 150))) 
                       (for ([(key value) (in-hash hash-base)])
                         (cond ((equal? key 'character-name) (send dc draw-text value char_x char_y))
                               ((equal? key 'character-class) (send dc draw-text value class_x line1_y))
@@ -101,10 +105,12 @@
                               ((equal? key 'character-race) (send dc draw-text value race_x line2_y))
                               ((equal? key 'character-alignment) (send dc draw-text value align_x line2_y))
                               ((equal? key 'character-exp) (send dc draw-text (number->string value)  player_x line2_y))
-                              ((equal? key 'character-hp) (send dc draw-text (number->string value) (+ class_x 50) 257))
-                              ((equal? key 'character-armor-class) (send dc draw-text (number->string value) 325 200))
+                              ((equal? key 'character-hp) (send dc draw-text (number->string value) (+ class_x 50) hp_y))
+                              ((equal? key 'character-armor-class) (send dc draw-text (number->string value) armor_class_x armor_class_y))
+                              ((equal? key 'character-speed) (send dc draw-text (number->string value) speed_x armor_class_y))
                               ((equal? key 'character-hit-dice) (send dc draw-text value 325 450))
                               ((equal? key 'character-proficiency-bonus) (send dc draw-text (number->string value) 140 225))
+                              (else (send dc draw-text (number->string (getmod "dexterity")) (add-delta armor_class_x 75) armor_class_y))
                               ))))
 
                 ; prints skills
@@ -186,19 +192,30 @@
                ; prints  notes 
                 (unless (hash-empty? hash-notes)
                   (begin (define notes (map string-split (map cdr (hash->list hash-notes))))
-                         (define lz 25)
+                         (define line-length 25)
                          (define y-coord 502)
                          (define (ps lst str x y delta)
                            (cond ((equal? lst '()) (begin (send dc draw-text str x y) (send dc draw-text "" x (add-delta y delta) (set! y-coord (add-delta y delta)))))
                                  (else (let ((z (string-append str " " (car lst))))
-                                         (if (> (string-length z) lz) (begin (send dc draw-text str x y) (ps lst "" x (+ y delta) delta))
+                                         (if (> (string-length z) line-length) (begin (send dc draw-text str x y) (ps lst "" x (+ y delta) delta))
                                              (ps (cdr lst) z x y delta))))))
                          (define (pn lst str x y delta)
                            (unless (equal? lst '())
                              (begin (ps (car lst) str x y delta) (pn (cdr lst) str x (+ y-coord delta) delta))))
                          (pn notes "" 545 y-coord 15)))
 
-               
+                ; calculates perception bonus
+                (define (calc-perception-bonus)
+                  (+ (getmod "wisdom") (if (cdr (hash-ref hash-skills 'perception)) (get-hash-base "character-proficiency-bonus") 0)))
+
+                ; calculates passive wisdom
+                (define (calc-passive-wisdom)
+                  (+ 10 (calc-perception-bonus)))
+
+                ;prints passive wisdom
+                (send dc draw-text (number->string (calc-passive-wisdom))  50 785)
+
+                
                
                 )]))
 
