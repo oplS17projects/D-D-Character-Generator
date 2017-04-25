@@ -214,13 +214,9 @@
 
                 ;prints passive wisdom
                 (send dc draw-text (number->string (calc-passive-wisdom))  50 785)
-
-                
-               
                 )]))
 
  
-
 ; boolean parameter determines whether to draw character sheet or not
 (define (genCS showsheet)
   (cond ((eq? showsheet #t) (begin (send cansheet on-paint)

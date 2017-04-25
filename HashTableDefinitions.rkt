@@ -170,7 +170,8 @@
                                                                 (cdr (hash-ref hash-weapons item))))))
       (hash-set! hash-weapons item (cons item qty))))
 
-
+                    
+; functions to set and get key/value in hash-base
 (define (set-hash-base ability value)
   (cond ((equal? ability "class") (hash-set! hash-base 'character-class value))
         ((equal? ability "race") (hash-set! hash-base 'character-race value))
@@ -201,6 +202,7 @@
         ((equal? ability "alignment") (hash-ref hash-base 'character-alignment))
         ))
 
+; re-initializes stats
 (define (re-init-stats)
   (begin (hash-clear! hash-inventory)
          (hash-clear! hash-choice-lists)

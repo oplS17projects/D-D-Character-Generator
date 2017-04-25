@@ -152,7 +152,7 @@
                         [style '(deleted)]))
 (define class-panel (new panel% [parent tab]
                          [style '(deleted)]))
-(define alignment-panel (new panel% [parent tab]
+(define alignment-panel (new horizontal-panel% [parent tab]
                              [style '(deleted)]))
 (define stats-panel (new horizontal-panel% [parent tab]
                          [style '(deleted)]))
@@ -229,13 +229,51 @@
 (define (set-alignment align)
   (set-hash-base "alignment" (list-ref (get-alignment-list) align)))
 
+(define (get-alignment align)
+  (file->string (string-append "./DND/" align ".txt")))
+
+(define l-alignment-panel (new panel%
+                           [parent alignment-panel]
+                           [style '(border)]))
+
+(define r-alignment-panel (new panel%
+                           [parent alignment-panel]
+                           [style '(border)]))
+
+(define a-can (new canvas%
+                         [parent r-alignment-panel]
+                         [min-height 630]
+                          [min-width 650]
+                                      [paint-callback
+                                      (λ (c dc)
+                                        (begin (send dc clear)
+                                               (send dc set-scale 1.5 1.5)
+                                        (unless (equal? "" (get-hash-base "alignment")) (unless (equal? "" (get-alignment (get-hash-base "alignment")))
+                                                         (begin (define (print-string str x y delta length)
+                                                                  (unless (equal? str "")
+                                                                    (begin (define align-list (string-split str))
+                                                                           (define len length)
+                                                                           (define (ps lst str x y delta)
+                                                                             (cond ((equal? lst '()) (send dc draw-text str x y))
+                                                                                   (else (let ((z (string-append str " " (car lst))))
+                                                                                           (if (> (string-length z) len) (begin (send dc draw-text str x y) (ps lst "" x (+ y delta) delta))
+                                                                                               (ps (cdr lst) z  x y delta)))))))
+                                                                    (ps align-list "" x y delta)))
+                                                                (print-string (get-alignment (get-hash-base "alignment")) 0 5 20 50))))))
+                                      ]))
+                                      
+                                       
+
 (define alignment-box (new radio-box%
                            [label "Alignment"]
                            [choices (get-alignment-list)]
-                           [parent alignment-panel]
+                           [parent l-alignment-panel]
                            [style  '(vertical)]
+                           [font (my-roman-font 20)]
                            [callback (λ (b e)
-                                       (set-alignment (send alignment-box get-selection)))]))
+                                       (begin (set-alignment (send alignment-box get-selection))
+                                              (send a-can on-paint)))]))
+
 ; choices for class tab
 (define class-box (new radio-box%
                      [label "Class"]
@@ -391,7 +429,7 @@
                                             (send dc clear)
                                             (send dc set-text-foreground "blue")
                                             (send dc set-scale 4 4)
-                                            (send dc draw-text (number->string (getHP)) 2 0))]))
+                                            (when (number? (getHP)) (send dc draw-text (number->string (getHP)) 2 0)))]))
 (define hp-r-buffer (new panel% [parent hp-pan]
                              [min-width 15]))
 (define blank-hp-panel (new panel% [parent r-stats]
