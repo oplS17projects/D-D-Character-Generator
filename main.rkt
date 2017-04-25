@@ -244,7 +244,7 @@
                                                                                                                                 (ps lst "" x (+ y delta) delta))
                                                                                                (ps (cdr lst) z  x y delta)))))))
                                                                     (ps info-list "" x y delta)))
-                                                                (print-string (get-text-file class) 300 0 13 40)))))
+                                                                (print-string (get-text-file class) 300 0 14 44)))))
                                       ]))
                                        
 
