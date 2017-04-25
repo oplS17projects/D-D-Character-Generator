@@ -187,9 +187,23 @@
                           [min-width 650]
                                       [paint-callback
                                       (λ (c dc)
-                                        (send dc clear)
-                                        (send dc draw-bitmap pic 0 0)
-                                       )]))
+                                        (begin (send dc clear)
+                                               (unless (equal? race 'nil)
+                                                 (send dc draw-bitmap pic 0 0)
+                                                 (begin (define (print-string str x y delta length)
+                                                                  (unless (equal? str "")
+                                                                    (begin (define info-list (string-split str))
+                                                                           (define len length)
+                                                                           (define (ps lst str x y delta)
+                                                                             (cond ((equal? lst '()) (send dc draw-text str x y))
+                                                                                   (else (let ((z (string-append str " " (car lst))))
+                                                                                           (if (> (string-length z) len) (begin (send dc draw-text str x y)
+                                                                                                                                (ps lst "" x (+ y delta) delta))
+                                                                                               (ps (cdr lst) z  x y delta)))))))
+                                                                    (ps info-list "" x y delta)))
+                                                                (print-string (get-text-file race) 300 0 15 40)))))
+                                      ]))
+                                       
 ; choices for race tab
 (define race-box (new radio-box%
                      [label "Race"]
@@ -216,9 +230,23 @@
                           [min-width 650]
                                       [paint-callback
                                       (λ (c dc)
-                                        (send dc clear)
-                                        (send dc draw-bitmap pic 0 0)
-                                       )]))
+                                        (begin (send dc clear)
+                                        (unless (equal? class 'nil)
+                                                 (send dc draw-bitmap pic 0 0)
+                                                 (begin (define (print-string str x y delta length)
+                                                                  (unless (equal? str "")
+                                                                    (begin (define info-list (string-split str))
+                                                                           (define len length)
+                                                                           (define (ps lst str x y delta)
+                                                                             (cond ((equal? lst '()) (send dc draw-text str x y))
+                                                                                   (else (let ((z (string-append str " " (car lst))))
+                                                                                           (if (> (string-length z) len) (begin (send dc draw-text str x y)
+                                                                                                                                (ps lst "" x (+ y delta) delta))
+                                                                                               (ps (cdr lst) z  x y delta)))))))
+                                                                    (ps info-list "" x y delta)))
+                                                                (print-string (get-text-file class) 300 0 13 40)))))
+                                      ]))
+                                       
 
 ; alignment tabs and functions
 (define (get-alignment-list)
