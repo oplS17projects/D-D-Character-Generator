@@ -1,1 +1,7 @@
-Insert cleric flavor text here
+When a cleric takes up an adventuring life, it is usually because his or her god demands it. The goals of the deities require that they have mortal agents in the world, and pursuing those goals often involves braving the dangers beyond the walls of civilization and security, smiting evil or seeking holy relics in ancient tombs. Many clerics are also expected to help and protect their deities’ worshipers, which can mean fighting orcs that threaten a village, negotiating peace between warring nations, or sealing a portal that would allow a demon prince to enter the world.
+
+Most adventuring clerics maintain some connection to established temples and orders of their faiths, and those connections sometimes lead them into adventures as well. A temple might ask for a cleric’s aid, or a high priest might be in a position to demand it.
+
+Divine magic, as the name suggests, is the power of the gods, flowing from them into the world. Clerics are conduits for that power, manifesting it as miraculous effects. The gods don’t grant this power lightly or to everyone who seeks it, but only to those they choose to fulfill a high calling. Harnessing divine magic doesn’t rely on study or training. A cleric might learn formulaic prayers and ancient rites, but ultimately the ability to cast cleric spells relies on devotion and an intuitive understanding of a deity’s wishes.
+
+Clerics combine the helpful magic of healing and inspiring their allies with spells that harm and hinder foes. They can inspire awe and dread, lay curses of plague or poison, and even call down flames from heaven to consume their enemies. And sometimes evildoers benefit most from a mace to the head, so clerics don’t neglect combat training and can wade into a melee.
