@@ -234,7 +234,7 @@
                            (line-length 25)
                            (x-coord 545)
                            (y-coord 502)
-                           (delt 15)
+                           (dy 15)
                            (print-string (λ (lst str x y delta)
                                  (cond ((equal? lst '()) (begin (send dc draw-text str x y) (send dc draw-text "" x (add-delta y delta)) (add-delta y (* 2 delta))))
                                        (else (let ((z (string-append str " " (car lst))))
@@ -243,7 +243,7 @@
                            (print-notes (λ (lst str x y delta)
                                  (unless (equal? lst '())
                                    (print-notes (cdr lst) str x (print-string (car lst) str x y delta) delta)))))
-                    (print-notes notes "" x-coord y-coord delt)))
+                    (print-notes notes "" x-coord y-coord dy)))
 
                 ; calculates perception bonus
                 (define (calc-perception-bonus)

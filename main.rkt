@@ -4,6 +4,7 @@
 (include "charsheet.rkt")
 
 ; pictures and races and race descriptions from https://dnd.wizards.com/dungeons-and-dragons/ and D&D Player's Handbook 5e
+; alignment descriptions from https://en.wikipedia.org/wiki/Alignment_(Dungeons_%26_Dragons)
 ; picture of cleric from http://forgottenrealms.wikia.com/wiki/Cleric and description from D&D Player's Handbook 5e
 ; picture of wizard from http://forgottenrealms.wikia.com/wiki/Wizard and description from D&D Player's handbook 5e
 ; picture of barbarian from http://www.sidharthchaturvedi.com/2014/08/d-next-barbarian.html and description from D&D Player's Handbook 5e
@@ -28,16 +29,15 @@
 ; High Elf theme is "Lothlorien" by Enya from the album "Shepherd Moons"
 ; Mountain Dwarf theme is "Hall of the Mountain King" by Savatage from the album "Hall of the Mountain King"
 
-(define current-theme main-theme)
 (define play-music-message "Toggle Music")
 (define music-status #t)
 ; plays background theme if different from theme currently playing
 (define (play-theme choice)
-  (let ((song (rs-read (string-append (path->string (cdr choice)) "/song.wav"))))
+  (let ((song (rs-read (string-append (path->string (cdr choice)) "/song.wav"))) (current-theme main-theme))
         (unless (equal? song current-theme)
           (when music-status (begin (stop) (set! current-theme song) (play current-theme))))))
 
-(play current-theme)
+(play main-theme)
 
 ; adjust points to allocate to stats
 (define points-to-allocate 0)
@@ -592,6 +592,7 @@
                         [callback (λ (b e)
                                     (genCS #f))]))
 
+; button toggles music on and off
 (define play-song-button (new button%
                               [label play-music-message]
                               [parent gen-panel]
