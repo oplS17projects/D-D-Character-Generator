@@ -84,13 +84,13 @@ For the first milestone, we have a fully functional GUI that allows selection of
 The backend has been mostly completed (including hash table). There are a few evaluator functions that need to be implemented. More features of the gui are done, including background music. There is some overall polishing that needs to be done.
 
 ### Public Presentation (Wed Apr 26)
-We have a functional character generator. We left out backgrounds because that is more of a roll playing thing that the player can choose. Also there are some place holder names such as "any*-simple-weapon" because we would have to implement a dictionary of sorts that would take time.
+We have a functional character generator. GUI allows selection of race, class, alignment,
+reallocation of points, and rerolling the character. We left out backgrounds because that is more of a roll playing thing that the player can choose. Also there are some place holder names such as "any*-simple-weapon" because we would have to implement a dictionary of sorts that would take time.
 
 ## Group Responsibilities
 
 ### Van Ha @VanHaUML
-Van Ha worked on the GUI to show and generate all of the information. GUI allows selection of race, class, alignment,
-reallocation of points, and rerolling the character. Music played with rsound library also was included.
+Van Ha worked on the GUI to show and generate all of the information. 
 
 ### Jonathan Murphy @MurphyWants
 Jonathan Murphy worked on the back end and the evaluator.
