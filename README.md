@@ -1,7 +1,7 @@
 # D&D Character Creator
 
 ### Statement
-The idea of this project is to be able to generate a random Dungeon and Dragons 5th edition character. We're doing this with various csv files that are parsed through an evaluator to generate the character.
+The idea of this project is to be able to generate a random Dungeon and Dragons 5th edition character. We have done this with various csv files that are parsed through an evaluator to generate the character.
 
 ### Analysis
 Map will be used extensively throughout this project to iterate through csv files (csv->map) and to iterate through lists.
@@ -27,40 +27,13 @@ The roll "2d6" means rolling 2 6 sided dice. We also used a regex to parse a str
 ~~~
 
 Each expression will be evaluated through a metacircular evaluator similiar to what we did in class.
-The following functions need to be checked and implimented:
-~~~
-add:+                        ; Standard add the list
-mul:*                        ; Multiply the list
-1st-lvl-hp                   ; Set the hp at first level
-set-hit-dice                 ; Sets the hit dice used for level up, ex: 1d8
-level-up                     ; Applies level up stuff
-inc-health                   ; Increase health
-roll                         ; Dice roll, already done, see above
-add-profiencies              ; Proficiency list notes?
-set-saving-throw             ; Stat should have a is-saving-throw element, set to true
-add-skill                    ; Sets skill to proficient
-add-skill-choice             ; (?) Save choices in list for future use?
-inc-skill-choices            ; Var starts at 0, increases by number
-choose-choices               ; Eval choices or print out choices?
-add-ability                  ; Set note of what the skill is and total uses
-set-ac                       ; Store the string to eval armor class
-roll-gold                    ; Evaluate the string and store the gold in inventory
-choose                       ; Given a list of options, choose a random one
-add-item                     ; Add item and quantity to inventory
-add-language-choice          ; See add-skill-choice
-inc-language-count           ; See inc-skill-choices
-add-note                     ; Adds generic note to character
-inc-stat                     ; Increases given stat by number, example (inc-stat "strength" 1)
-set-speed                    ; Sets walking speed
-set-sc                       ; Set subclass
-if-sc                        ; If character has subclass, do something
-~~~
+Each function is detailed in [this documentation file.]("documentation.md")
 
 ### Data Sets or other Source Materials
-Any and all csv files will be written by us from either the [Dungeon and Dragon's 5e Player's Handbook](http://a.co/hDUb8oH) or other homebrew material.
+Any and all csv files to generate the race or class will be written by us from either the [Dungeon and Dragon's 5e Player's Handbook](http://a.co/hDUb8oH) or other homebrew material.
 --Note someone scanned the book online [here][online-pdf]
 
-An example of a Barbarian class would be something like the following, commented after with ; is an explication
+An example of a Barbarian class is something like the following, commented after with ; is an explication
 ~~~
 1st-lvl-hp, "add:+, 12, cons-mod"          ; Evaluate the following at level 1
 set-hit-dice, 1d12                         ; Setting the hit dice character variable
@@ -88,38 +61,38 @@ add-item, javelin, 4
 ~~~
 
 ### Deliverable and Demonstration
-The end product will be some sort of GUI to display the generated character.
+The end product is a gui that allows the person to choose a race, a class, an alignment, the ability to reroll stats and a function that generates the character sheet with details printed on it.
 
 ### Evaluation of Results
-We'll know it works if a complete character is shown.
+We can fully generate a character, except for background.
 
 ## Architecture Diagram
-![Diagram image](diagram.png?raw=true "Architecture Diagram")
+![Diagram image](diagramafter.png?raw=true "Architecture Diagram")
 
-The project starts with a variety of csv files. This files are a list of races, classes and backgrounds. Each of these has a function (get-background-list, get-class-list, get-race-list) that returns a list of cons, where the first argument is a readable name and the second element is a path to the correct file or folder.
+The project starts with a variety of csv files. This files are a list of races and classes. Each of these has a function (get-class-list, get-race-list) that returns a list of cons, where the first argument is a readable name and the second element is a path to the correct file or folder.
 
-This list gets passed to the evaluator. Each race, class and background is chosen or chosen randomly. After choosing one of each, each race csv file gets evaluated through the evaluator. Then the class correct level#.csv file gets evaluated. Then the background.csv file gets evaluated.
+This list gets passed to the evaluator. Each race and class is chosen or chosen randomly. After choosing one of each, each race csv file gets evaluated through the evaluator. Then the class correct level#.csv file gets evaluated. Then the background.csv file gets evaluated.
 
-Throughout the evaluation, all values are stored in a hash table. The data will be accessible through the Gui.
+Throughout the evaluation, all values are stored in a hash table. The data is accessible through the Gui.
 
 ## Schedule
 
 ### First Milestone (Sun Apr 9)
-We will have some functions of the evaluator working, be able to read from the necessary files and some basic functions of a GUI.
+For the first milestone, we have a fully functional GUI that allows selection of different races and classes. The evaluator has most functions working.
 
 ### Second Milestone (Sun Apr 16)
-We'll have the evaluator working and a fully functional GUI.
+The backend has been mostly completed (including hash table). There are a few evaluator functions that need to be implemented. More features of the gui are done, including background music. There is some overall polishing that needs to be done.
 
-### Public Presentation (Mon Apr 24, Wed Apr 26, or Fri Apr 28 [your date to be determined later])
-We'll have multiple races, background and classes.
+### Public Presentation (Wed Apr 26)
+We have a functional character generator. We left out backgrounds because that is more of a roll playing thing that the player can choose. Also there are some place holder names such as "any*-simple-weapon" because we would have to implement a dictionary of sorts that would take time.
 
 ## Group Responsibilities
 
 ### Van Ha @VanHaUML
-I will be working on the GUI and the functions to extract information from the hash table that stores the data and display them in the GUI.
+Van Ha worked on the GUI to show and generate all of the information.
 
 ### Jonathan Murphy @MurphyWants
-The evaluator, reading from files and storing data in the hash table.
+Jonathan Murphy worked on the back end and the evaluator.
 
 
 [online-pdf]: https://dnd.rem.uz/5e%20D%26D%20Books/D%26D%205e%20-%20Players%20Handbook%20(Small).pdf
