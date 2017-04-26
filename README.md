@@ -89,7 +89,8 @@ We have a functional character generator. We left out backgrounds because that i
 ## Group Responsibilities
 
 ### Van Ha @VanHaUML
-Van Ha worked on the GUI to show and generate all of the information.
+Van Ha worked on the GUI to show and generate all of the information. GUI allows selection of race, class, alignment,
+reallocation of points, and rerolling the character. Music played with rsound library also was included.
 
 ### Jonathan Murphy @MurphyWants
 Jonathan Murphy worked on the back end and the evaluator.
