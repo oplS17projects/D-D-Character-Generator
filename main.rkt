@@ -502,7 +502,7 @@
                      [font (my-roman-font 15)]
                      (callback (λ ( b e)
                                  (begin (update-hp -) (dec-stat-points "constitution")
-                                        (send hp-tally on-paint) (send con-canvas on-paint))))))
+                                        (send con-canvas on-paint) (send hp-tally on-paint) )))))
                     
 (define con-message (new message% [parent con-panel]
                          [label "Constitution"]
@@ -512,7 +512,7 @@
                      [font (my-roman-font 15)]
                      (callback (λ (b e)
                                  (begin (update-hp +) (inc-stat-points "constitution")
-                                        (send hp-tally on-paint) (send con-canvas on-paint))))))
+                                        (send con-canvas on-paint) (send hp-tally on-paint) )))))
 
 ; adjust wisdom
 (define dec-wis (new button% [parent wis-panel]
@@ -566,7 +566,9 @@
                     [label "Reroll Stats"]
                     [parent gen-panel]
                     [callback (λ (b e)
-                                (begin (generatestats)
+                                (begin (re-init-stats)
+                                       (generatestats)
+                                       (set-race-init race)
                                        (set-class-init class)
                                        (set! points-to-allocate 0)
                                        (send str-canvas on-paint)
