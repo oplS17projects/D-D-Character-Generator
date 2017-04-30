@@ -8,7 +8,7 @@
 I worked together with Van Ha to create a mostly functioning Dungeons and Dragons 5e character creator.
 My portion of the project consisted of creating the backend which was a metacircular evaluator and the hash tables.
 
-We used hash tables to store all of the character information. The metacircular evaluator was used in conjunction with a domain specific language that I came up with. The reason being is that I wanted to have something file based so that it is easily expandable for other races and classes. With this method, anyone can create a new folder with a relevant CSV file that can be parsed through the evaluator.
+We used hash tables to store all of the character information. The metacircular evaluator was used in conjunction with a domain specific language that I came up with. The reason being is that I wanted to have something file based so that it is easily expandable for other races and classes. With this method, anyone can create a new folder with a relevant CSV file that can be parsed through the evaluator. I documented part of it [here](Documentation.md).
 
 The folders are generated into a race list and a class list which is then presented to the user on the GUI.
 
