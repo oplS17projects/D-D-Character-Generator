@@ -93,3 +93,23 @@ I also use map in another instance.
   )
 ```
 get-class-list and get-race-list both search through their respective folders (DND/race and DND/class) to generate a list of classes and races with each item being a cons. The first element is a string which is the name of the class/race. The second item is the path folder to the relevant data.
+
+## 4. Domain Specific Language
+Last but not least is about the domain specific language that I implemented. This part I'm not quite sure what to talk about, but as I mentioned before I wanted to use CSV files. So the structure of the language is as follows:
+```
+function, arg1, arg2, .... , argn
+```
+Which would be translated as a list and passed to the evaluator which would evaluate the relevant function.
+
+A few examples:
+```
+inc-stat, dexterity, 2
+inc-stat, intelligence, 1
+```
+The evaluator would take that, find the relevant stat and increase it by the last number. This function has 3 arguments, including itself.
+
+```
+add-language, common
+add-language, elvish
+```
+The evalautor would take that and note that the character can speak, read and write common and elvish. This function has 2 arguments, including itself.
