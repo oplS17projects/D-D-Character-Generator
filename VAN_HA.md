@@ -16,7 +16,7 @@ for the music to be toggled on and off. The GUI allows access to the information
 various hash tables.
 
 I found it interesting to create something with a GUI. Everything I've written before was all based on
-around interfacing through the command line. In addition, it allowed me to bridge an unfamiliar library, ```racket/gui``` into something I am more familiar with, hash tables. This also allowed for some graphic des
+around interfacing through the command line. In addition, it allowed me to bridge an unfamiliar library, ```racket/gui``` into something I am more familiar with, hash tables.
 
 **Authorship note:** All of the code described herein was written by myself except where mentioned otherwise.
 
