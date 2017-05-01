@@ -1,4 +1,4 @@
-# GUI to D & D 5e Character Generator
+# Dungeons & Dragons 5e Character Generator
 
 ## Van Ha
 
