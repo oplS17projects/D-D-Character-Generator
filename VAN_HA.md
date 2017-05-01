@@ -22,7 +22,7 @@ around interfacing through the command line. In addition, it allowed me to bridg
 
 
 # Libraries Used
-###External Libraries:
+### External Libraries:
 ```
 (racket/gui)
 (rsound)
@@ -30,7 +30,7 @@ around interfacing through the command line. In addition, it allowed me to bridg
 * racket/gui provides the interface through which to interact with the character generator
 * rsound provides the ability to play music
 
-###Internal Libraries:
+### Internal Libraries:
 ```
 (require "evaluator.rkt")
 (require "charsheet.rkt")
@@ -50,10 +50,10 @@ around interfacing through the command line. In addition, it allowed me to bridg
         (unless (equal? song current-theme)
           (when music-status (begin (stop) (set! current-theme song) (play current-theme))))))
 ```
-The procedure ```play-theme```, when first called, returns a procedure that is a closure created by the ```let```. This procedure sets the local state variable ```current-theme``` to ```main-theme```.
+The procedure ```play-theme```, when first called, returns a procedure that is a closure created by the ```let```. Since the call to ```play-theme``` is not assigned to a variable, each procedural call is calling the same closure. This procedure sets the local state variable ```current-theme``` to ```main-theme```.
 At each successive call to this procedure, the ```song``` which is stored on the local storage drive and whose
 path is derived through taking the information stored in the ```cdr``` of the ```choice``` object passed as an argument
-and appending it to a ```path->string``` conversion is compared to the object in ```current-theme```. Through closure, the variable ```current-theme``` is lexically bound to the procedure returned by ```play-theme```, can only be seen within that procedure, and ```current-theme``` is able to remember what value it currently holds each time ```play-theme``` is called. If different, ```play-theme``` assigns ```song``` to the ```current-theme``` through state modification by using ```set!```.
+and appending it to a ```path->string``` conversion is compared to the object in ```current-theme```. Through closure, the variable ```current-theme``` is lexically bound to the procedure returned by ```play-theme```, can only be seen within that procedure, and ```current-theme``` is able to remember what value it currently holds each time ```play-theme``` is called. If different, ```play-theme``` assigns ```song``` to the ```current-theme``` through modification by using ```set!```.
 
 
 ## 2. Recursion, Map, and Let to Print Lists of Strings
