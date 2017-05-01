@@ -86,4 +86,17 @@ to be split up which is what the ```(letrec ((notes (map string-split (map cdr (
   
 These procedures are an example of procedural abstraction. ```calc-mod``` has three paramters: ```str``` is the statistic whose modifier should be calculated, ```op``` is the operator, and ```num``` is a number on which the operator will be used. This procedure returns the value of the modifier as calculated by this implementation. If future editions of Dungeons & Dragons changes how modifiers should be calculated, this procedure can be changed without the user's knowing about it.
 
-```update-hp``` has one parameter: ```op``` which is an operator. It uses ```calc-mod``` to calculate one of its ```let*``` variables. As with ```calc-mod```, if the implementation of ```update-hp``` needs to be changed, it could be done so without the user's knowing about the internal operations. Just by changing ```calc-mod```, both procedures would be changed. Both procedures themselves have implementations which are partially abstracted away to other procedures.
+```update-hp``` has one parameter: ```op``` which is an operator. It uses ```calc-mod``` to calculate one of its ```let*``` variables. As with ```calc-mod```, if the implementation of ```update-hp``` needs to be changed, it could be done so without the user's knowing about the internal operations. Just by changing ```calc-mod```, both procedures would be changed. Both procedures themselves have implementations which are partially abstracted away to other procedures such as ```getstat``` and ```get-stat-num``` which were written by Jonathan.
+
+## 4. Recursion and List Manipulation
+```
+(define (print-list lst x y delta)
+                             (unless (equal? lst '())
+                               (let ((item (cadar lst)) (quantity (cddar lst)))
+                                     (begin (send dc draw-text
+                                                  (if (number? quantity) (string-append (if (number? quantity) (number->string quantity) quantity) " " item)
+                                                      (string-append quantity " " item)) x y)
+                                            (print-list (cdr lst) x (add-delta y delta) delta)))))
+```
+
+The ```print-list``` procedure uses recursion and combinations of ```car``` and ```cdr``` to extract an item and its quantity out of a list of cons cells and draw it to a x, y position on the drawing context of a ```canvas``` object. It uses an ```if``` expression to check that ```quantity``` is a number as a way to error check.
