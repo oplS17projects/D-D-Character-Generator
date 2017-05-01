@@ -79,7 +79,7 @@ This particular piece of code was used to print a list of strings in the hash ta
 functions, ```print-notes``` and ```print-strings```. The issue was that the ```canvas``` object of ```racket/gui``` draws strings on one line and does not recognize newlines or any type of carriage returns. Thus the ```draw-text``` function of ```canvas``` would draw a string off the canvas if it was too long, which in this case, it did. Therefore the strings needed
 to be split up which is what the ```(letrec ((notes (map string-split (map cdr (hash->list hash-notes))))``` code does. The hash table is turned into a list, which is sent as an argument to ```map cdr``` which creates the list of strings which in turn is sent to ```map string-split``` to finally create a list of lists of strings which is assigned to ```notes``` by ```letrec```. ```letrec``` also assigns the various local variables which are needed to do the recursion such as ```line-length```. The recursive procedure ```print-strings``` prints the inner list of strings by recursively concatenating the ```str``` string object with the ```car``` of the list and only printing out those strings under the value of ```line-length``` and then recursively doing the same to the rest of the list. ```print-notes``` recursively prints all the list of strings in the list ```notes```. It accepts the ```print-strings``` as one of its arguments, the one representing the y-coordinate, since at the end of ```print-strings``` returns the y-coordinate for ```print-notes``` to start printing the new string. Thus, this creates a nested recursive procedure.
 
-## 3. Procedural Abtraction
+## 3. Procedural Abstraction
 
 ```
 (define (update-hp op)
