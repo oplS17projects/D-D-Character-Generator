@@ -22,7 +22,6 @@ around interfacing through the command line. In addition, it allowed me to bridg
 
 
 # Libraries Used
-### External Libraries:
 ```
 (racket/gui)
 (rsound)
@@ -30,19 +29,10 @@ around interfacing through the command line. In addition, it allowed me to bridg
 * racket/gui provides the interface through which to interact with the character generator
 * rsound provides the ability to play music
 
-### Internal Libraries:
-```
-(require "evaluator.rkt")
-(require "charsheet.rkt")
-(require "HashTableDefinitions.rkt")
-```
-* evaluator.rkt provided the metacircular evaluator
-* charsheet.rkt provided the frame to draw the character sheet by main.rkt
-* HashTableDefinitions.rkt provided the hash table definitions and procedures
 
 # Key Code Concepts
 
-## 1. Closure to Create Local State Variable
+## 1. Closure to Create Local Variable
 
 ```
 (define (play-theme choice)
