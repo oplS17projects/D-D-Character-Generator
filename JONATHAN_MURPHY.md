@@ -68,7 +68,7 @@ To save space, the function was cut down, the entire function can be found in ev
       0
       (+ (+ 1 (random  dicesize)) (roll (- numdice 1) dicesize))))
 ```
-To do a diceroll, the string is first passed to diceroll which seperates what the dice are and how many. That gets passed to the roll function. If the number of dice is 0, return 0. Otherwise, choose a random number between 1 and the dice size and add that to the roll function with 1 less dice.
+To do a diceroll, the string is first passed to diceroll which separates what the dice are and how many. That gets passed to the roll function. If the number of dice is 0, return 0. Otherwise, choose a random number between 1 and the dice size and add that to the roll function with 1 less dice.
 Example: 2d8 = 1d8 + 1d8 + 0
 
 ## 3. Use of filter/map
